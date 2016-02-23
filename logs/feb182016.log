@@ -1,0 +1,3 @@
+Today I focused on random replica distribution,
+I wanted to find out how increasing the replicas affected the distance to the closest replica
+I wrote 2 simulators, one for distance in space and another for distance on a scale free graph and both agreed that the number of replicas seems to hit a sweet spot around 20 where the returns on further replicas rapidly diminishes.

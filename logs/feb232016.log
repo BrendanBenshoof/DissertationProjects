@@ -1,0 +1,6 @@
+Added inital latex outline for replica paper.
+I expanded the scope of the paper a bit.
+There is a lot of discussion on replica mechanisms for p2p networks.
+Almost all of it focuses on churn robustness rather than partition tolerance.
+Work looks like it should be focused on examing how exemplars of these schemes work in terms of partition tolerance.
+
