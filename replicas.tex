@@ -456,9 +456,20 @@ Each strategy will be described, analyzed and finally compared and contrasted wi
 \subsection{Robustness and Churn}
 \subsection{Robustness and network partitions}
 
-\section{Randomized Replication Strategies}
+\section{Passive Replication Strategies}
+\subsection{k-nearest nodes}
+\subsection{k-random nodes}
 
 \section{Active Replication Strategies}
+\subsection{Active sponsorship}
+Active sponsorship is part of the method used to greatest effect in practice (it is often combined with a passive replication strategy).
+When a member adds records to the network, it periodically re-adds the records such that the records are ensured to exist in a reachable location.
+This method is specifically designed to combat churn related data loss.
+It's success is predicated on the idea that the member adding the file will be more reliable then most nodes in the network and will persist over time.
+Often the sponsorship is shared between many members who have a vested interest in the existence of the record.
+Uptime is a function of the rate of sponsorship, number of sponsors, churn rate and any passive strategies used to augment the system.
+\subsection{p2p backups}
+\subsection{Replication within subnetworks}
 
 \section{Conclusions}
 
