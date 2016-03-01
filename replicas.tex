@@ -454,7 +454,15 @@ Each strategy will be described, analyzed and finally compared and contrasted wi
 \section{Robustness}
 
 \subsection{Robustness and Churn}
+Most DHTs focus their efforts on preventing record loss due to churn. They rely on building topologies robust against random failures, under the assumption that because the overlay network is effectively a random mapping to the real world, that failures in the network will be independent events.
 \subsection{Robustness and network partitions}
+Network partitions are when a failure results in the network separating into multiple non-connected networks.
+This can be a result of failures in the underlay and the overlay networks.
+The result of this, is that unlike the churn based failures, failure of nodes is not independent.
+For example, if two previously connected regions of the Internet cease to be connected due to disaster or political intervention, there will be two new networks, each having just lost all nodes in the other partition simultaneously.
+This means that robustness methods based on re-storing records after they are lost are likely to be insufficient as all the possessors of a record may be found only in one of the partitions.
+
+In practice, partitions may occur due to failures of infrastructure, manipulation of BGP, and eclipse attacks.
 
 \section{Passive Replication Strategies}
 \subsection{k-nearest nodes}
