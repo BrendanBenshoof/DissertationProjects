@@ -458,6 +458,11 @@ Each strategy will be described, analyzed and finally compared and contrasted wi
 
 \section{Passive Replication Strategies}
 \subsection{k-nearest nodes}
+K-nearest replication is a common strategy in Kademlia based networks.
+When storing a record members preform a multi-beam search to discover the k closest to the target nodes.
+This has an advantage over K-random nodes in that in many cases of failure there is no downtime.
+If the current owner of a record dies, an adjacent node that likely already has a backup takes over responsibility.
+Failure in such a system is limited to partition failures, where only one partition of the network is likely 
 \subsection{k-random nodes}
 
 \section{Active Replication Strategies}
