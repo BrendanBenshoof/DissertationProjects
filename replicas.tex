@@ -454,14 +454,38 @@ Each strategy will be described, analyzed and finally compared and contrasted wi
 \section{Robustness}
 
 \subsection{Robustness and Churn}
+Most DHTs focus their efforts on preventing record loss due to churn. They rely on building topologies robust against random failures, under the assumption that because the overlay network is effectively a random mapping to the real world, that failures in the network will be independent events.
 \subsection{Robustness and network partitions}
+Network partitions are when a failure results in the network separating into multiple non-connected networks.
+This can be a result of failures in the underlay and the overlay networks.
+The result of this, is that unlike the churn based failures, failure of nodes is not independent.
+For example, if two previously connected regions of the Internet cease to be connected due to disaster or political intervention, there will be two new networks, each having just lost all nodes in the other partition simultaneously.
+This means that robustness methods based on re-storing records after they are lost are likely to be insufficient as all the possessors of a record may be found only in one of the partitions.
 
-\section{Randomized Replication Strategies}
+In practice, partitions may occur due to failures of infrastructure, manipulation of BGP, and eclipse attacks.
+
+\section{Passive Replication Strategies}
+\subsection{k-nearest nodes}
+K-nearest replication is a common strategy in Kademlia based networks.
+When storing a record members preform a multi-beam search to discover the k closest to the target nodes.
+This has an advantage over K-random nodes in that in many cases of failure there is no downtime.
+If the current owner of a record dies, an adjacent node that likely already has a backup takes over responsibility.
+Failure in such a system is limited to partition failures, where only one partition of the network is likely 
+\subsection{k-random nodes}
 
 \subsection{k-Replica}
 \subsection{Adaptive Replica (IRM)}
 
 \section{Active Replication Strategies}
+\subsection{Active sponsorship}
+Active sponsorship is part of the method used to greatest effect in practice (it is often combined with a passive replication strategy).
+When a member adds records to the network, it periodically re-adds the records such that the records are ensured to exist in a reachable location.
+This method is specifically designed to combat churn related data loss.
+It's success is predicated on the idea that the member adding the file will be more reliable then most nodes in the network and will persist over time.
+Often the sponsorship is shared between many members who have a vested interest in the existence of the record.
+Uptime is a function of the rate of sponsorship, number of sponsors, churn rate and any passive strategies used to augment the system.
+\subsection{p2p backups}
+\subsection{Replication within subnetworks}
 
 \subsection{Active Sponsorship}
 
