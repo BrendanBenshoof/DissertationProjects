@@ -1,0 +1,103 @@
+
+
+
+
+
+
+\chapter{Introduction}
+
+
+\section{The Problem}
+
+I am setting forth to solve two problems in the space of decentralized services. That such services compete for infrastructures and provide high barriers to adoption even for those technically inclined and that current decentralized service overlay topologies are wasteful in management fo latency on congestion.
+
+Most p2p systems require/leverage a core infrastructure for peer selection and maintaining shared state.
+The most commonly used such system is a Distributed Hash Table\cite{stoica2001chord}.
+It allows networks to discover other peers in an organized fashion and to provide the network a shared "key-value" store.
+Because many networks implement and run their own DHT networks and protocols, they cannot benefit from a shared infrastructure beyond that of the Internet itself.
+This is reasonable cost because each network has differing use cases and makes different assumptions about the capabilities of every node in its own network.
+% (for example cjdns assumes all dht nodes also run the cjdn service)
+
+Current technologies utilize network topologies built on metric spaces intended to facilitate a O(log(n)) diameter, with the partially correct assumption that this will also minimize the amount of time required to preform a lookup on the network. 
+Because these topologies are constructed without regard to the underlying network, they often provide grossly inefficient paths through the underlay network when following a short overlay network path.
+
+
+\section{My Proposal}
+
+While the problems presented are not strictly connected, they are bothing being considered because they share a solution.
+Changing the foundational assumptions of distributed hash tables give us opportunity to change their practical and perceived utility.
+I intend to research, propose, and develop a successor technology to current 'Distributed Hash Tables' (Kademlia, Chord, CAN) in the form of a 'Decentralized Infrastructure Network' (working name).
+This technology will provide increased performance, facilitate the use of current and new p2p distributed systems, and provide a distributed infrastructure for new p2p client-side applications in Server, PC, Browser, and Mobile environments.
+
+This successor technology would be similar to current Distributed Hash tables in many ways: It will build a p2p overlay routing network, it will utilize a 'metric space' and hash functions to assign locations to nodes and records, it will Utilize a similar but simplified network protocol and maintenance cycle.
+
+The important differences from established will be:
+
+\begin{itemize}
+\item Differentiation between 'Clients' and 'Servers' which allows users to utilize the network without contributing
+\item Abstraction of the 'Peer selection metrics' which will allow us to research and examine optimal solutions to our use case.
+\item Support for service specific 'subnetworks' that will allow existing p2p systems to leverage the DIN.
+\item Provide a multiple-use 'reusable' network infrastructure to allow for easier entry for software developers into the p2p distributed systems space.
+\item Utilize the abstract 'metrics' to minimize lookup latency while preserving low maintenance costs, particularly Hyperbolic metrics.
+\end{itemize}
+
+
+
+
+
+
+
+
+
+\chapter{Technical Background}
+\section{What is a DHT?}
+A DHT is a technique to provide a key-value store on a distributed network.
+It allows a group of distributed computers to keep a rough consensus and distributed state.
+In practice, DHTs and similar distributed system's performance has been bound by the CAP Theorem\cite{brewer2010certain}.
+
+\subsection{CAP Theorem/ Brewer’s Theorem}
+CAP Theorem describes a trade-off between three Attributes of distributed systems.
+It states, that any distributed system is a compromise between consistency, availability and partition tolerance and that no distributed store of state can posses all of these qualities at a time.
+\begin{itemize}
+\item Consistency: Everybody agrees on the contents of shared data
+\item Availability: Everybody can quickly and consistently access all the data.
+\item Partition Tolerance: The network can handle loss of nodes and connectivity between nodes without loosing the system's cohesion or data.
+\end{itemize}
+
+As partition tolerance is required in a DHT for long term operation, this leaves us a trade-off between Consistency and Availability.
+In DHTs consistency is limited to assure availability of records to users, however such trade-offs are not binary, and we can can seek a balance between availability and consistency to best suit the needs of applications.
+
+
+\section{What are the currently existing DHTs?}
+
+\subsection{Kademlia}
+
+Kademlia is the most popular DHT methodology. 
+It powers the trackerless bittorent mainline DHT, and the C implementation related to that project is likely the greatest cause of it's popularity.
+many other distributed systems utilize modified versions of Kademlia as a means of peer management and as a key-value store.
+
+Kademlia is built in a non-eucldian metric space. 
+Locations are represented by a large integer (160 bit is most common) and the distance between locations is calculated by the XOR metric.
+This means Kademlia's metric space is a generalization of a binary tree, where the locations are mapped to leaf nodes and distance between nodes is the distance required to traverse between them on that tree.
+
+Because of the geometric awkwardness of it's metric, Kademlia uses a modified k-nearest neighbors approach to approximate node's voronoi regions and Delaney peers.
+If nodes are evenly distributed through the space, kademlia's metric provides an $O(log(n))$ diameter network.
+
+\subsection{Chord}
+
+Chord is a familiy of ring-based DHT's.
+Locations are represented by a large integer similar to kademlia.
+The metric is a unidirectional (bidirectional in some variants) modulus ring.
+
+Chord tracks the immediate peers in either direction on this ring to maintain the networks and calculating delaunay triangulation and voronoi regions in this metric is trivial.
+
+This metric alone would give chord's topology an $O(n)$ diameter 
+and to mitigate this, each node maintains $O(log(n))$ ``fingers''
+ distributed in such a way that the diameter of the network is reduced to $O(log(n))$.
+
+\section{What are DHTs used for}
+
+DHTs are designed to be used to store data in a distributed system that would normally be centrally stored in other systems, like a database or other records.
+In practice, they also double as a mechanism for peers discovery and network management.
+Many p2p services use a DHT as part of their infrastructure: Bitorrent\cite{jimenez2011kademlia}, CJDNS\cite{hodson2013meshnet}, and I2P\cite{zantout2011i2p}
+% %Give examples of how DHTs are used in those projects

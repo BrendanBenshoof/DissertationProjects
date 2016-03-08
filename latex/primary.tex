@@ -1,0 +1,157 @@
+\documentclass[12pt,letterpaper]{report}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{tabularx}
+%\usepackage{algorithmic}
+\usepackage{algorithm,algpseudocode}
+
+\usepackage{subcaption}
+\usepackage[font=small]{caption}
+\usepackage{url}
+\usepackage[english]{babel}
+\usepackage{setspace} 
+\usepackage[margin=1in]{geometry}
+
+
+%\usepackage{times}
+%\usepackage{venturis2}
+
+\doublespacing
+
+\title{\textsc{BUILDING ROBUST DISTRIBUTED INFRASTRUCTURE NETWORKS}}
+\author{\textsc{Brendan Lane Benshoof}}
+\date{}
+
+\begin{document}
+	
+	\pagenumbering{gobble}
+
+	
+	\begin{center}
+		%	\includegraphics[width=0.15\textwidth]{example-image-1x1}\par\vspace{1cm}
+		{\scshape BUILDING ROBUST DISTRIBUTED INFRASTRUCTURE NETWORKS\par}
+		\vspace{0.5cm}
+		{by\par}
+		\vspace{0.5cm}
+		{\scshape Brendan Lane Benshoof\par}
+		\vspace{0.5cm}
+		{Under the Direction of Dr.~Robert ~Harrison, PhD \par}
+		\vspace{0.5cm}
+		{\scshape Abstract \par}
+		
+	\end{center}
+Many competing designs for Distributed Hash Tables exist exploring multiple models of addressing, routing and network maintenance. Designing a general theoretical model and implementation of a Distributed Hash Table allows exploration of the possible properties of distributed hash tables. We will propose a generalized model of DHT behavior, centered on utilizing Delunay triangulation in a given metric space to maintain the network’s topology. We will show that utilizing this model, we can produce network typologies that approximate existing DHT methods and provide a starting point for further exploration.
+Previous research has explored utilizing a hyperbolic metric space to provide efficient greedy routing for overlay networks. We will use our generalized model of DHT construction to design and implement more efficient distributed hash table protocol, and discuss the qualities of potential successors to existing DHT technologies.
+	
+	\vfill
+	
+	
+	% Bottom of the page
+
+	
+	
+	\newpage 
+	\begin{titlepage}
+		
+		\begin{center}
+			%	\includegraphics[width=0.15\textwidth]{example-image-1x1}\par\vspace{1cm}
+			{\scshape TBUILDING ROBUST DISTRIBUTED INFRASTRUCTURE NETWORKS\par}
+			\vspace{5cm}
+			{by\par}
+			\vspace{5cm}
+			{\scshape Brendan Lane Benshoof\par}
+			
+			\vfill
+			A Dissertation Submitted in Partial Fulfillment of the Requirements for the Degree of\\
+			Doctor of Philosophy in Computer Science\\
+			in the College of Arts and Sciences\\
+			Georgia State University\\
+			2016
+		\end{center}
+	\end{titlepage}
+	
+	
+	
+	
+	
+	
+	\null\vfill
+	\begin{center}
+		
+		Copyright by \\
+		Brendan Lane Benshoof\\
+		2016
+	\end{center}
+	\newpage
+	
+	
+	
+	\begin{center}
+		{\scshape BUILDING ROBUST DISTRIBUTED INFRASTRUCTURE NETWORKS\par}
+		\vspace{5cm}
+		{by\par}
+		\vspace{5cm}
+		{\scshape Brendan Lane Benshoof\par}
+	\end{center}
+	\vfill
+	\hfill\begin{tabular}{rl}
+		Committee Chair & Robert Harrison \\ 
+		&  \\ 
+		Committee &  Raj Sunderraman \\ 
+		& Anu G. Bourgeois\\ 
+		& Valerie Miller 
+	\end{tabular} 
+	
+	
+	\noindent
+	Electronic Version Approved:\\
+	\vspace{1cm}
+	
+	\noindent
+	Office of Graduate Studies \\
+	College of Arts and Sciences \\
+	Georgia State University\\
+	May 2016 
+	
+	
+	
+	
+	\chapter*{Dedication}
+	Dedicated to the people who I owe my success, to be enumerated in the future.
+	
+	
+	\chapter*{Acknowledgements}	
+	A lot of people helped me do all of this. I should stop pretending I did it all for a second and mention them.
+	
+	\setcounter{tocdepth}{0}
+	\tableofcontents
+	\cleardoublepage
+	\pagenumbering{roman}
+
+	\listoftables
+	\addcontentsline{toc}{chapter}{List of Tables}
+	\listoffigures
+	\addcontentsline{toc}{chapter}{List of Figures}
+	
+	%\addcontentsline{toc}{chapter}{\listtablename}
+	%\addcontentsline{toc}{chapter}{\listfigurename}
+	
+
+	\clearpage	
+	
+	
+	\pagenumbering{arabic}
+	\include{intro}
+	\include{chordreduce}
+	\include{DGVH}
+	\include{UrDHT}
+	%\include{replicas}
+	%\include{hyperbolic}
+	
+	\addcontentsline{toc}{chapter}{Bibliography}
+	\bibliography{mine}
+	\bibliographystyle{plain}
+\end{document}
