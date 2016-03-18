@@ -1,0 +1,148 @@
+\chapter{Replication Strategies to Increase Storage Robustness in Decentralized P2P Architectures}
+%
+%
+% author names and IEEE memberships
+% note positions of commas and nonbreaking spaces ( ~ ) LaTeX will not break
+% a structure at a ~ so this keeps an author's name from being broken across
+% two lines.
+% use \thanks{} to gain access to the first footnote area
+% a separate \thanks must be used for each paragraph as LaTeX2e's \thanks
+% was not built to handle multiple paragraphs
+%
+\begin{center}
+Brendan ~Benshoof
+\end{center}
+
+
+% note the % following the last \IEEEmembership and also \thanks -
+% these prevent an unwanted space from occurring between the last author name
+% and the end of the author line. i.e., if you had this:
+%
+% \author{....lastname \thanks{...} \thanks{...} }
+%                     ^------------^------------^----Do not want these spaces!
+%
+% a space would be appended to the last name and could cause every name on that
+% line to be shifted left slightly. This is one of those "LaTeX things". For
+% instance, "\textbf{A} \textbf{B}" will typeset as "A B" not "AB". To get
+% "AB" then you have to do: "\textbf{A}\textbf{B}"
+% \thanks is no different in this regard, so shield the last } of each \thanks
+% that ends a line with a % and do not let a space in before the next \thanks.
+% Spaces after \IEEEmembership other than the last one are OK (and needed) as
+% you are supposed to have spaces between the names. For what it is worth,
+% this is a minor point as most people would not even notice if the said evil
+% space somehow managed to creep in.
+
+
+
+% The paper headers
+% The only time the second header will appear is for the odd numbered pages
+% after the title page when using the twoside option.
+%
+% *** Note that you probably will NOT want to include the author's ***
+% *** name in the headers of peer review papers.                   ***
+% You can use \ifCLASSOPTIONpeerreview for conditional compilation here if
+% you desire.
+
+
+
+
+% If you want to put a publisher's ID mark on the page you can do it like
+% this:
+%\IEEEpubid{0000--0000/00\$00.00~\copyright~2015 IEEE}
+% Remember, if you use this you must call \IEEEpubidadjcol in the second
+% column for its text to clear the IEEEpubid mark.
+
+
+
+% use for special paper notices
+%\IEEEspecialpapernotice{(Invited Paper)}
+
+
+
+
+% make the title area
+
+
+% As a general rule, do not put math, special symbols or citations
+% in the abstract or keywords.
+\begin{abstract}
+Classic P2P key-value storage systems use a small section of strategies to ensure that records are maintained in the system despite constant churn.
+These strategies see effective levels of robustness to churn, however they often do not provide effective robustness against systemic failures due to natural disasters and network partitioning in the Internet or the overlay topology of the P2P systems.
+We explore and evaluate the status quo of replica robustness strategies in the face of partition failures and propose new techniques to improve over the established methods.
+\end{abstract}
+
+
+
+\section{Introduction}
+
+In this paper, we will consider a selection of strategies to increase robustness of storage in a p2p network.
+Each strategy will be described, analyzed and finally compared and contrasted with other strategies.
+
+
+Current DHTs are oprimized to store a large number of smaller records.
+While is it is perfectly viable to link together such records to store larger files (and even use it as a shared file system), it has generally been used as a layer of indirection and provides means of discovering high bandwidth protocols. For example, Bitorent uses a DHT to help find peers for particular torrent rather than storing the files directly on the DHT.
+If we maintain this trend of only storing small records on the DHT, it stands out as a clear choice for use a shared DNS cache, or as a mechanism for storing encrypted cryptographic keys.
+All of these  use cases are predicated on a DHT being a reliable store of data.
+
+\section{Robustness}
+
+\subsection{Robustness and Churn}
+Most DHTs focus their efforts on preventing record loss due to churn.
+Records are lost to churn under two conditions: the node hosting the replica leaves the network or the node with a replica ceases to be responsible for the record due to a new node joining the network and claiming that portion of the address space. 
+We will describe churn as a ``Replacement ratio'': $R$, which is measured over a period of time (most often a day).
+This value describes the portion of DHT's metric space that is maintained by a different node at the end of the period.
+This value is related to the more conventional churn rate metric $\frac{exits + joins}{2*size}$ but provides more information on the viability of records.
+
+\subsection{Robustness and network partitions}
+Network partitions are when a failure results in the network separating into multiple non-connected networks.
+This can be a result of failures in the underlay and the overlay networks.
+The result of this, is that unlike the churn based failures, failure of nodes is not independent.
+For example, if two previously connected regions of the Internet cease to be connected due to disaster or political intervention, there will be two new networks, each having just lost all nodes in the other partition simultaneously.
+This means that robustness methods based on re-storing records after they are lost are likely to be insufficient as all the possessors of a record may be found only in one of the partitions.
+
+In practice, partitions may occur due to failures of infrastructure, manipulation of BGP, and eclipse attacks.
+
+\section{Passive Replication Strategies}
+
+When DHTs are formalized\cite{chord}\cite{kademlia}, replication strategies are not discussed.
+Passive strategies are those where a client writes the record and replicas to the DHT once, then no participant ever re-publishes the record.
+Because of constant churn, such records are likely doomed to be lost as the nodes to which they were stored leave the network due to churn.
+
+\subsection{k-random nodes}
+The K-random node strategy is not used by any established DHT, however it provides a simple analytical model, which we can extend to the other replica strategies.
+In the K-random node strategy, a stored replica
+
+
+\subsection{k-nearest nodes}
+K-nearest replication is a common strategy in Kademlia based networks.
+When storing a record members preform a multi-beam search to discover the k closest to the target nodes.
+This has an advantage over K-random nodes in that in many cases of failure there is no downtime.
+If the current owner of a record dies, an adjacent node that likely already has a backup takes over responsibility.
+Failure in such a system is limited to partition failures, where only one partition of the network is likely 
+
+
+\section{Active Replication Strategies}
+
+
+\subsection{k-Replica}
+\subsection{Adaptive Replica (IRM)}
+
+\section{Active Replication Strategies}
+\subsection{Active sponsorship}
+Active sponsorship is part of the method used to greatest effect in practice (it is often combined with a passive replication strategy).
+When a member adds records to the network, it periodically re-adds the records such that the records are ensured to exist in a reachable location.
+This method is specifically designed to combat churn related data loss.
+It's success is predicated on the idea that the member adding the file will be more reliable then most nodes in the network and will persist over time.
+Often the sponsorship is shared between many members who have a vested interest in the existence of the record.
+Uptime is a function of the rate of sponsorship, number of sponsors, churn rate and any passive strategies used to augment the system.
+\subsection{p2p backups}
+\subsection{Replication within subnetworks}
+
+\subsection{Active Sponsorship}
+
+\subsection{Redundant Subnetworks}
+
+\section{analysis}
+
+\section{Conclusions}
+

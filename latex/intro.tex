@@ -51,9 +51,10 @@ The important differences from established will be:
 
 \chapter{Technical Background}
 \section{What is a DHT?}
-A DHT is a technique to provide a key-value store on a distributed network.
-It allows a group of distributed computers to keep a rough consensus and distributed state.
-In practice, DHTs and similar distributed system's performance has been bound by the CAP Theorem\cite{brewer2010certain}.
+At the core of maintaining a distributed system is establishing a shared state in the form of a table of key-value pairs.
+DHTs provide a mechanism for agreeing upon a very large shared state with tolerable inconsistency (records are sometimes lost, and if mutable they may be inconsistent in value).
+While other techniques of concensus provide higher confidance, DHTs scale to awesome levels of storage capacity because they are highly tolerant of the failure of nodes within themselves.
+In practice, DHTs and similar distributed system's performance are bound by the CAP Theorem\cite{brewer2010certain}.
 
 \subsection{CAP Theorem/ Brewer’s Theorem}
 CAP Theorem describes a trade-off between three Attributes of distributed systems.
@@ -69,6 +70,10 @@ In DHTs consistency is limited to assure availability of records to users, howev
 
 
 \section{What are the currently existing DHTs?}
+
+Chord and Kademlia are the most commonly used DHTs in practice. 
+Chord has been favored by researchers because it was designed with a series of proofs to show it's consistency in the face of churn.
+Sadly these proofs have been shown to be incorrect\cite{} without serious modification to the established protocol.
 
 \subsection{Kademlia}
 
