@@ -89,7 +89,7 @@ All of these  use cases are predicated on a DHT being a reliable store of data.
 \subsection{Robustness and Churn}
 Most DHTs focus their efforts on preventing record loss due to churn.
 Records are lost to churn under two conditions: the node hosting the replica leaves the network or the node with a replica ceases to be responsible for the record due to a new node joining the network and claiming that portion of the address space. 
-We will describe churn as a ``Replacement ratio'': $R$, which is measured over a period of time (most often a day).
+We will describe churn as a ``Replacement ratio'': $R_{c}$, which is measured over a period of time (most often a day).
 This value describes the portion of DHT's metric space that is maintained by a different node at the end of the period.
 This value is related to the more conventional churn rate metric $\frac{exits + joins}{2*size}$ but provides more information on the viability of records.
 
@@ -98,19 +98,39 @@ Network partitions are when a failure results in the network separating into mul
 This can be a result of failures in the underlay and the overlay networks.
 The result of this, is that unlike the churn based failures, failure of nodes is not independent.
 For example, if two previously connected regions of the Internet cease to be connected due to disaster or political intervention, there will be two new networks, each having just lost all nodes in the other partition simultaneously.
-This means that robustness methods based on re-storing records after they are lost are likely to be insufficient as all the possessors of a record may be found only in one of the partitions.
+This means that robustness methods based periodically re-storing records after they are lost are likely to be insufficient as all the possessors of a record may be found only in one of the partitions.
 
-In practice, partitions may occur due to failures of infrastructure, manipulation of BGP, and eclipse attacks.
+In practice, overlay partitions may occur due to eclipse attacks and logic errors in how the DHT constructs the overlay.
+We will discuss overlay partitions in terms of a ratio $R_{o}$ that describes the size of a connected subnetwork that remains after a partition.
+
+\subsubsection{Underlay Partitions}
+An underlay partition can happen as result in a failure of infrastructure, manipulation of BGP, or governmental action.
+Assuming the overlay network of the DHT has been constructed randomly in relation to the underlay network, the failures due to the underlay partition will essentially occur at random locations in the network. 
+
+While this may resemble how failure occurs during churn, the failures will all occur effectively simultaneously, to a potentially very large segment of the population of the network.
+Kademlia's topology is likely to recover from such an event, however searching the network will be impaired while new connections are established.
+Chord's consistent topology proof is built upon an invariant that any join or exit from the network is occurring when the majority of the network is consistent. 
+The sudden failure of nodes in a Underlay partition situation violates this assumption and may destroy the ability of the remaining chord networks to form a searchable overlay topology.
+
+We will discuss underlay partitions in terms of a ratio $R_{u}$ that describes the fraction of randomly distributed members of the network that remain after an underlay partition occurs. 
 
 \section{Passive Replication Strategies}
 
 When DHTs are formalized\cite{chord}\cite{kademlia}, replication strategies are not discussed.
 Passive strategies are those where a client writes the record and replicas to the DHT once, then no participant ever re-publishes the record.
 Because of constant churn, such records are likely doomed to be lost as the nodes to which they were stored leave the network due to churn.
+Because partition failures are being analyzed as specific events, rather than behavior over time, passive strategies will often fair similarly to active strategies because there will not have been sufficient time for nodes or sponsors to take action in response to the partition (If they realize a partition has occurred at all).
 
 \subsection{k-random nodes}
 The K-random node strategy is not used by any established DHT, however it provides a simple analytical model, which we can extend to the other replica strategies.
-In the K-random node strategy, a stored replica
+In the K-random node strategy, a file is stored at K locations chosen by chaining of a cryptographic hash.
+That is, if a record is stored a location $L$, the first replica will be stored at location $hash(L)$ and the second at $hash(hash(L))$ and similarly re-hashing the identifier from the previous step until K nodes have been stored.
+
+This scheme allows for simple speedup and redundancy.
+Given a location $L$, any node can locate the potential k backup sites and search them by order of closeness or in parallel (effectively in order of latency).
+Because the locations are effectively random, we can simplify our analysis for churn and partition tolerance.
+
+The half-life due to churn for the record (a time period over which, on average, the number of replicas in the network will be halved ) is $\frac{-\log(2)}{1-R_{c}}$ and because records are a small integer, we can also consider an expected mean lifetime of a record in terms of the number of replicas: $\frac{\log{K}}{\log(2)} * \frac{-\log(2)}{1-R_{c}}$
 
 
 \subsection{k-nearest nodes}
@@ -118,7 +138,7 @@ K-nearest replication is a common strategy in Kademlia based networks.
 When storing a record members preform a multi-beam search to discover the k closest to the target nodes.
 This has an advantage over K-random nodes in that in many cases of failure there is no downtime.
 If the current owner of a record dies, an adjacent node that likely already has a backup takes over responsibility.
-Failure in such a system is limited to partition failures, where only one partition of the network is likely 
+Failure in such a system is limited to overlay partition failures, where only one partition of the network is likely 
 
 
 \section{Active Replication Strategies}
