@@ -102,6 +102,8 @@ This means that robustness methods based periodically re-storing records after t
 
 In practice, overlay partitions may occur due to eclipse attacks and logic errors in how the DHT constructs the overlay.
 We will discuss overlay partitions in terms of a ratio $R_{o}$ that describes the size of a connected subnetwork that remains after a partition.
+It is worth considering, that in the case of any partition, the ideal behavior is that both resulting partitions remain connected, search-able, and retain findable replicas of all records.
+
 
 \subsubsection{Underlay Partitions}
 An underlay partition can happen as result in a failure of infrastructure, manipulation of BGP, or governmental action.
@@ -130,7 +132,13 @@ This scheme allows for simple speedup and redundancy.
 Given a location $L$, any node can locate the potential k backup sites and search them by order of closeness or in parallel (effectively in order of latency).
 Because the locations are effectively random, we can simplify our analysis for churn and partition tolerance.
 
-The half-life due to churn for the record (a time period over which, on average, the number of replicas in the network will be halved ) is $\frac{-\log(2)}{1-R_{c}}$ and because records are a small integer, we can also consider an expected mean lifetime of a record in terms of the number of replicas: $\frac{\log{K}}{\log(2)} * \frac{-\log(2)}{1-R_{c}}$
+The half-life due to churn for the record (a time period over which, on average, the number of replicas in the network will be halved ) is $\frac{-\log(2)}{\log{1-R_{c}}}$ and because records are a small integer, we can also consider an expected mean lifetime of a record in the network: $\frac{\log{K}}{\log(2)} * \frac{-\log(2)}{\log{1-R_{c}}}$. This value describes the time period after which the expected mean number of remaining replicas is 1. Because this 1 is the mean value, there is a 50\% likelihood there are less than 1 replica (or zero replicas, as the number of replicas is a natural number that cannot take partial values.)
+
+This means we can present the average lifetime of a record in the network in terms of the number of replicas and churn replacement rate to be $O(\frac{-\log{K}}{\log{1-R_{c}}})$.
+This implies that while more replicas always results in a longer expected lifetime, the returns on adding additional replicas diminishes quickly.
+
+The random-k strategy preforms similarly in bother underlay and overlay partition failures (as the replicas in the network are effectively random in relation to each type of failure).
+The expected fraction of surviving nodes is simply the $R$ fraction of the original network that the partition represents and the likelihood that a record is totally lost is simply the odds that all replicas are not in the considered partition: $(1-R)^{K}+R^{K}$. 
 
 
 \subsection{k-nearest nodes}
@@ -138,7 +146,12 @@ K-nearest replication is a common strategy in Kademlia based networks.
 When storing a record members preform a multi-beam search to discover the k closest to the target nodes.
 This has an advantage over K-random nodes in that in many cases of failure there is no downtime.
 If the current owner of a record dies, an adjacent node that likely already has a backup takes over responsibility.
-Failure in such a system is limited to overlay partition failures, where only one partition of the network is likely 
+In terms of churn resistance and underlay failure, K-nearest behaves identically to k-random simply because the likelihood of loss due to churn is independent of the replica's location in the network.
+
+In the case of an overlay partition, the k-nearest strategy is less robust because it is more likely that all the nodes in the network fall on the larger side of the partition.
+
+
+  
 
 
 \section{Active Replication Strategies}
