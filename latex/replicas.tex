@@ -10,7 +10,7 @@
 % was not built to handle multiple paragraphs
 %
 \begin{center}
-Brendan ~Benshoof
+Brendan Benshoof
 \end{center}
 
 
@@ -123,7 +123,7 @@ Passive strategies are those where a client writes the record and replicas to th
 Because of constant churn, such records are likely doomed to be lost as the nodes to which they were stored leave the network due to churn.
 Because partition failures are being analyzed as specific events, rather than behavior over time, passive strategies will often fair similarly to active strategies because there will not have been sufficient time for nodes or sponsors to take action in response to the partition (If they realize a partition has occurred at all).
 
-\subsection{k-random nodes}
+\subsection{K-Random Replicas}
 The K-random node strategy is not used by any established DHT, however it provides a simple analytical model, which we can extend to the other replica strategies.
 In the K-random node strategy, a file is stored at K locations chosen by chaining of a cryptographic hash.
 That is, if a record is stored a location $L$, the first replica will be stored at location $hash(L)$ and the second at $hash(hash(L))$ and similarly re-hashing the identifier from the previous step until K nodes have been stored.
@@ -138,10 +138,10 @@ This means we can present the average lifetime of a record in the network in ter
 This implies that while more replicas always results in a longer expected lifetime, the returns on adding additional replicas diminishes quickly.
 
 The random-k strategy preforms similarly in bother underlay and overlay partition failures (as the replicas in the network are effectively random in relation to each type of failure).
-The expected fraction of surviving nodes is simply the $R$ fraction of the original network that the partition represents and the likelihood that a record is totally lost is simply the odds that all replicas are not in the considered partition: $(1-R)^{K}+R^{K}$. 
+The expected fraction of surviving nodes is simply the $R$ fraction of the original network that the partition represents and the likelihood that a record is totally lost is simply the odds that all replicas are not in the considered partition: $(1-R)^{K}$. 
 
 
-\subsection{k-nearest nodes}
+\subsection{K-Nearest Replicas}
 K-nearest replication is a common strategy in Kademlia based networks.
 When storing a record members preform a multi-beam search to discover the k closest to the target nodes.
 This has an advantage over K-random nodes in that in many cases of failure there is no downtime.
@@ -149,29 +149,52 @@ If the current owner of a record dies, an adjacent node that likely already has 
 In terms of churn resistance and underlay failure, K-nearest behaves identically to k-random simply because the likelihood of loss due to churn is independent of the replica's location in the network.
 
 In the case of an overlay partition, the k-nearest strategy is less robust because it is more likely that all the nodes in the network fall on the larger side of the partition.
-
+Unlike the k-random strategy, the odds that all replicas is lost is proportional to the size of the surviving partition $R_{o}$ because we can treat the entire cluster of replicas as one point because the likelihood the cluster will be cut by the partition is negligible, so in this case, any $O(1)$ number of replicas would not provide tangible benefit.
 
   
 
 
 \section{Active Replication Strategies}
 
+Unlike the passive replication strategies, which doomed even highly backed up records to eventual loss, active strategies for much higher expected record lifetimes (there will always be a chance that records could be lost despite all efforts to back them up) .
+In active replica strategies, records and replicas are restored as they are lost due to churn.
 
-\subsection{k-Replica}
-\subsection{Adaptive Replica (IRM)}
-
-\section{Active Replication Strategies}
-\subsection{Active sponsorship}
-Active sponsorship is part of the method used to greatest effect in practice (it is often combined with a passive replication strategy).
-When a member adds records to the network, it periodically re-adds the records such that the records are ensured to exist in a reachable location.
-This method is specifically designed to combat churn related data loss.
-It's success is predicated on the idea that the member adding the file will be more reliable then most nodes in the network and will persist over time.
-Often the sponsorship is shared between many members who have a vested interest in the existence of the record.
-Uptime is a function of the rate of sponsorship, number of sponsors, churn rate and any passive strategies used to augment the system.
-\subsection{p2p backups}
-\subsection{Replication within subnetworks}
 
 \subsection{Active Sponsorship}
+
+Active sponsorship is the strategy most often used for reliability in DHTs.
+Rather than members of the DHT taking any actions for ensuring reliability, the DHT behaves as originally specified and acts only as dumb storage.
+To ensure that a record survives churn, a sponsor outside the network periodically re-stores the record and replicas in the network.
+The ideal is that this solves the problem of reliability by placing it in the hands of the users, and that critical records will see reliable sponsors.
+From an analytical standpoint, the sponsor's continued ability to re-store the record is no different from the K-random strategy, admittedly with a much lower rate of node replacement.
+It resembles the k-random backups strategy because we assume the likelihood of failure of a sponsor results in an exponential decay scenario exactly like the k-random replicas (k-independent sponsors) some practical applications of DHTs like bittorrent and ipfs add additional sponsors as the record is demanded, however unpopular records are essentially as likely to be lost as k-random replicas once the sponsor fails.
+
+
+
+\subsection{Active Random K-Replicas}
+The active random k-replicas strategy requires a slight modification to how the DHT stores information.
+In addition to recording the key value pair, if a replica is being stored, the original location of storage must be accessible to the node.
+In this strategy, all nodes in the DHT iterate over the values stored in them (likely spread out over the span of hours or a day) and ensures the record and k-replicas are periodically restored.
+This failure using this strategy requires that all nodes hosting the records are removed from the network before any one of them can restore the record.
+This means, likelihood of failure over the restoration period is $R_{c}^{K}$. This essentially dramatically increases the efficacy of replicas in increasing the half-life of the record: $\frac{-\log{2} }{\log{(1-R_{c}^{K}})}$.
+Unlike the passive strategy, the addition of more replicas exponentially increases the half life of the record in the network.
+
+Active Random K-Replicas behaves identically to passive random k-replicas in terms of its partition tolerance (both underlay and overlay).
+
+
+
+
+
+\subsection{Active Nearest K-Replicas}
+
+
+\subsection{Demand based Replication}
+
+\subsection{p2p backups}
+
+\subsection{Replication within subnetworks}
+
+
 
 \subsection{Redundant Subnetworks}
 
