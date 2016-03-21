@@ -118,7 +118,6 @@ We will discuss underlay partitions in terms of a ratio $R_{u}$ that describes t
 
 \section{Passive Replication Strategies}
 
-When DHTs are formalized\cite{chord}\cite{kademlia}, replication strategies are not discussed.
 Passive strategies are those where a client writes the record and replicas to the DHT once, then no participant ever re-publishes the record.
 Because of constant churn, such records are likely doomed to be lost as the nodes to which they were stored leave the network due to churn.
 Because partition failures are being analyzed as specific events, rather than behavior over time, passive strategies will often fair similarly to active strategies because there will not have been sufficient time for nodes or sponsors to take action in response to the partition (If they realize a partition has occurred at all).
@@ -162,43 +161,60 @@ In active replica strategies, records and replicas are restored as they are lost
 
 \subsection{Active Sponsorship}
 
-Active sponsorship is the strategy most often used for reliability in DHTs.
+The Kademlia paper proposes a strategy for active replication \cite{kademlia}, however in practice only the "greeting" portion (where new nodes are given the records they are now responsible for) is implemented and Active Sponsorship is the strategy effectively used.
 Rather than members of the DHT taking any actions for ensuring reliability, the DHT behaves as originally specified and acts only as dumb storage.
 To ensure that a record survives churn, a sponsor outside the network periodically re-stores the record and replicas in the network.
 The ideal is that this solves the problem of reliability by placing it in the hands of the users, and that critical records will see reliable sponsors.
 From an analytical standpoint, the sponsor's continued ability to re-store the record is no different from the K-random strategy, admittedly with a much lower rate of node replacement.
-It resembles the k-random backups strategy because we assume the likelihood of failure of a sponsor results in an exponential decay scenario exactly like the k-random replicas (k-independent sponsors) some practical applications of DHTs like bittorrent and ipfs add additional sponsors as the record is demanded, however unpopular records are essentially as likely to be lost as k-random replicas once the sponsor fails.
+It resembles the k-random backups strategy because we assume the likelihood of failure of a sponsor results in the long term is exactly like the k-random replicas (k-independent sponsors) some practical applications of DHTs like bittorrent and ipfs add additional sponsors as the record is demanded, however unpopular records are essentially as likely to be lost as k-random replicas once the sponsor fails.
 
 
 
-\subsection{Active Random K-Replicas}
-The active random k-replicas strategy requires a slight modification to how the DHT stores information.
+\subsection{Active Random K Replicas}
+The active random k replicas strategy requires a slight modification to how the DHT stores information.
 In addition to recording the key value pair, if a replica is being stored, the original location of storage must be accessible to the node.
-In this strategy, all nodes in the DHT iterate over the values stored in them (likely spread out over the span of hours or a day) and ensures the record and k-replicas are periodically restored.
+In this strategy, all nodes in the DHT iterate over the values stored in them (likely spread out over the span of hours or a day) and ensures the record and k replicas are periodically restored.
 This failure using this strategy requires that all nodes hosting the records are removed from the network before any one of them can restore the record.
 This means, likelihood of failure over the restoration period is $R_{c}^{K}$. This essentially dramatically increases the efficacy of replicas in increasing the half-life of the record: $\frac{-\log{2} }{\log{(1-R_{c}^{K}})}$.
+We can simplify this half-life into a format more comparable using the bound $log_{2}(1+x) \leq x$ which results in $Halflife \geq (\frac{1}{R_{c}})^{K}$.
 Unlike the passive strategy, the addition of more replicas exponentially increases the half life of the record in the network.
+In addition, the base $\frac{1}{R_{c}}$ indicates that lowering the restoration period, and thus decreasing $R_{c}$ also causes dramatic improvements to the reliability.
 
-Active Random K-Replicas behaves identically to passive random k-replicas in terms of its partition tolerance (both underlay and overlay).
-
-
-
-
-
-\subsection{Active Nearest K-Replicas}
-
-
-\subsection{Demand based Replication}
-
-\subsection{p2p backups}
-
-\subsection{Replication within subnetworks}
+Active Random K Replicas behaves identically to passive random k replicas in terms of its partition tolerance (both underlay and overlay).
 
 
 
-\subsection{Redundant Subnetworks}
+
+
+\subsection{Active Nearest K Replicas}
+The basis of this strategy can be found in the Kademlia\cite{kademlia} paper, however we offer analysis and improvements that are not included in Kademlia (which offers no analysis on reliability due to the replica strategy at all)  .
+
+The Active Nearest K Replicas provides the most churn resistant structure discussed. 
+If each of the K nearest replicas is re-storing the record periodically we see an analysis similar to the Active Random K Replicas, however because nodes have more information concerning the state of nodes close to them in the network than nodes randomly located in the network.
+When a node responsible for a record fails, the replica node that assumes responsibility for the record can detect this event because it is already a peer with that node, and detection of failure is integrated into the DHT's protocol.
+This means that using only 1 responsible node to periodically restore the replicas of the record is sufficient $iff$ when the responsible node fails, the inheritor quickly detects the change in responsibility and immediately restores the K replicas (adding a new replica node to maintain K copies of the file in the network).
+This allows us to leverage the work already done by the DHT protocol to dramatically reduce both the cost of maintenance and the window of vulnerability.
+The only way for the record to be lost, is for all the replica nodes to be removed due to churn before any 1 of them detects the change in responsibility and re-publishes the records.
+It is reasonable to assume that the detection of lost peers and restoring the k-replicas can be accomplished within seconds or minutes rather than the standard 24-hour restoration cycle.
+
+As and example, let us consider a network with $R_{day}$ likelihood of a record being lost per day.
+if $R_{day}=0.99$ then the likelihood of loss in 1 minute is $R_{minute} = 1-(1-R_{day})^{\frac{1}{24*60}}$ or $R_{minute} = 0.0031929$. 
+
+Given this $R_{minute}$ and the requirement for $K$ failures in the period to occur,
+the expected half-life of the record in the network is $\frac{-\log(2)}{\log(1-R_{minute}^{K})}$.
+If $K$ is set to 10, the expected half-life in minutes of the record with 10 active replicas in a network where 99\% of the nodes are replaced in a day is $6.29*10^{24}$ minutes or $8.7*10^{8}$ times the age of the universe.
+
+In practice, half-lives the large indicate that it is reasonable to expect the likelihood of the record's loss is dominated by partition failures and the eventual obsolescence of the network.
+
+\subsection{Partition Tolerance}
+Because, during partition failures, any active component is unlikely to be able to respond to the failure, active strategies do not provide improvement over passive.
+Similarly to the passive nearest K replicas strategy, active k nearest is identical to random k replicas in the case of underlay partition and essentially equivalent to having no backups at all in the case of overlay partition tolerance.
+This indicates that while the active k nearest strategy is incredibly robust to churn and tolerably robust to underlay failure, it is comparatively vulnerable to overlay partition failure (likely caused by an eclipse attack)
+
 
 \section{analysis}
 
 \section{Conclusions}
+
+Using modifications of strategies presented in 2002 by Kademlia\cite{kademlia}, which have remained largely unimplemented for the past 14 years, we can build DHT networks that can reasonably be expected to never loose records due to churn during their active use lifetime with an overhead lower than the current actively used sponsorship based strategy.
 
