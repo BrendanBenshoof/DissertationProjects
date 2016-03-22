@@ -297,34 +297,36 @@ To simulate an underlay partition we randomly select the appropriate number of n
 Overlay partition failures are more difficult to simulate.
 In order to generate a partition of a given size, we will choose a random root node, and iteratively add nodes by closeness to the partition 
 
-\begin{figure}
-	\includegraphics[width=0.5\textwidth]{figs/underlay_kad_random}
-\end{figure}
-\begin{figure}
-	\includegraphics[width=0.5\textwidth]{figs/underlay_chord_random}
-\end{figure}
-\begin{figure}
-	\includegraphics[width=0.5\textwidth]{figs/overlay_kad_random}
-\end{figure}
-\begin{figure}
-	\includegraphics[width=0.5\textwidth]{figs/overlay_chord_random}
-\end{figure}
-\begin{figure}
-	\includegraphics[width=0.5\textwidth]{figs/underlay_kad_nearest}
-\end{figure}
-\begin{figure}
-	\includegraphics[width=0.5\textwidth]{figs/underlay_chord_nearest}
-\end{figure}
-\begin{figure}
-	\includegraphics[width=0.5\textwidth]{figs/overlay_kad_nearest}
-\end{figure}
-\begin{figure}
-	\includegraphics[width=0.5\textwidth]{figs/overlay_chord_nearest}
-\end{figure}
+
 
 \section{Conclusions}
 
 Using modifications of strategies presented in 2002 by Kademlia\cite{kademlia}, which have remained largely unimplemented for the past 14 years, we can build DHT networks that can reasonably be expected to never loose records due to churn during their active use lifetime with an overhead lower than the current actively used sponsorship based strategy.
+
+\begin{figure}[h]
+	\includegraphics[width=0.5\textwidth]{figs/underlay_kad_random}
+\end{figure}
+\begin{figure}[h]
+	\includegraphics[width=0.5\textwidth]{figs/underlay_chord_random}
+\end{figure}
+\begin{figure}[h]
+	\includegraphics[width=0.5\textwidth]{figs/overlay_kad_random}
+\end{figure}
+\begin{figure}[h]
+	\includegraphics[width=0.5\textwidth]{figs/overlay_chord_random}
+\end{figure}
+\begin{figure}[h]
+	\includegraphics[width=0.5\textwidth]{figs/underlay_kad_nearest}
+\end{figure}
+\begin{figure}[h]
+	\includegraphics[width=0.5\textwidth]{figs/underlay_chord_nearest}
+\end{figure}
+\begin{figure}[h]
+	\includegraphics[width=0.5\textwidth]{figs/overlay_kad_nearest}
+\end{figure}
+\begin{figure}[h]
+	\includegraphics[width=0.5\textwidth]{figs/overlay_chord_nearest}
+\end{figure}
 
 \bibliography{mine}
 \bibliographystyle{IEEEtran}
