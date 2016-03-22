@@ -2,7 +2,7 @@ import networkx as nx
 from hashlib import sha1
 from functools import reduce
 import random
-BASE = 8
+BASE = 160
 MAX = 2**BASE
 
 
@@ -54,22 +54,37 @@ def prefix_match(A, B):
 B_SIZE = 5
 
 
-def build_buckets_2(t, pop):
+def getBits(x):
+    output = []
+    for i in range(BASE)[::-1]:
+        # #print(i)
+        bit = (x // 2**i) % 2
+        output.append(str(bit))
+    return(''.join(output))
 
-    buckets = {0: [t], 1: []}
+# getBits(31)
+# exit()
+
+
+def build_buckets_2(t, pop):
+    pop = pop[:]
+    buckets = {0: [], 1: []}
+    bit = t // (2**(BASE - 1)) % 2
+    buckets[bit].append(t)
     random.shuffle(pop)
     peers = []
     for p in pop:
+        #print(t, p)
         if p == t:
             continue
         pointer = buckets
         height = BASE - 1
-        delta = t ^ p
         done = False
         while not done:
-            bit = (delta // 2**height) % 2
-            print(height)
-            #print(p, height, bit, pointer)
+            assert(height >= 0)
+            bit = (p // 2**height) % 2
+            ##print(height, bit)
+            ##print(p, height, bit, pointer)
             if type(pointer[bit]) == type([]):
                 if len(pointer[bit]) < B_SIZE:
                     pointer[bit].append(p)
@@ -78,27 +93,26 @@ def build_buckets_2(t, pop):
                 else:
                     # bucket it full
                     if t in pointer[bit]:
+                        peers.append(p)
                         # we have to split it
-
-                        todo = pointer[bit] + [t, p]
+                        todo = pointer[bit]
+                        todo.append(t)
+                        todo.append(p)
                         pointer[bit] = {0: [], 1: []}
                         pointer = pointer[bit]
                         for r in todo:
-                            sub_delta = delta = r ^ p
-                            sub_bit = (delta // 2**(height - 1)) % 2
+                            sub_bit = (r // 2**(height - 1)) % 2
                             pointer[sub_bit].append(r)
-                        peers.append(p)
                     done = True
             else:
                 height -= 1
                 pointer = pointer[bit]
-    print(p, buckets)
+    #print(t, getBits(t), buckets)
     return peers
 
 
 def build_buckets(t, pop):
     buckets = [[t]]
-    random.shuffle(pop)
     for p in pop:
 
         if p == 1:
@@ -122,8 +136,8 @@ def build_buckets(t, pop):
                         R_bucket.append(n)
                 buckets.append(L_bucket)
                 buckets.append(R_bucket)
-    # print(t)
-    #print(sorted(buckets, key=len))
+    # #print(t)
+    ##print(sorted(buckets, key=len))
     return list(reduce(lambda x, y: x + y, buckets))
 
 
@@ -141,18 +155,15 @@ def buildKAD(size):
 
     population = sorted([int(sha1(bytes(str(x), "UTF-8")).hexdigest(), 16) %
                          MAX for x in range(size)])
+    # print(population)
     g = nx.DiGraph()
     g.add_nodes_from(population)
-    for p in population:
-        peers = build_buckets_2(p, population)
-        print(len(peers))
+    for focus in population:
+        peers = build_buckets_2(focus, population)
+        # print(len(peers))
         for other in peers:
-            g.add_edge(p, other)
+            g.add_edge(focus, other)
     nx.write_gpickle(g, "kad.pickle")
     return g
 
-g = buildKAD(100)
-from matplotlib import pyplot as plt
-nx.draw(g, pos=layout_chord(g), labels={x: str(x) for x in g.nodes()})
-print(nx.is_strongly_connected(g))
-plt.show()
+g = buildKAD(1000)
