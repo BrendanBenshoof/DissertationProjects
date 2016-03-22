@@ -33,7 +33,7 @@ def nearest_k(g,dists, k):
 
 
 def runtests_underlay():
-    underlay_data_failure = {"title": "O Failure Likelihood",
+    underlay_data_failure = {"title": "Underlay Failure Likelihood",
                              "x-axis": "Percentage of nodes removed", "y-axis": "Liklihood of data loss",
                              "plots": {}}
 
@@ -46,8 +46,8 @@ def runtests_underlay():
     kad_paths = nx.all_pairs_shortest_path_length(g_kad)
 
     graphs = {"Chord":(g_chord, chord_paths) , "Kademlia":(g_kad,kad_paths) }
-    strats = {"Random K": random_k, "Nearest K": nearest_k}
-    K = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    strats = {"Random K": random_k}#, "Nearest K": nearest_k}
+    K = [11]
     R = [0.1 + x * 0.1 for x in range(9)]
     samples = 100
 
@@ -66,7 +66,7 @@ def runtests_underlay():
                         dists = graph_data[1]
                         replicas = strats_func(g,dists, k)
                         underlay_failure(g, r_)
-                        if nx.is_strongly_connected(g):
+                        if not nx.is_strongly_connected(g):
                             partition_total += 1.0
                         victory = False
                         for r in replicas:
@@ -86,9 +86,9 @@ def runtests_underlay():
                 #
                 underlay_data_partition["plots"]["%s %s-%d Partition Chance" %
                                                  (graph_name, strats_name, k)] = partition__plot
-    with open("Underlay_partition.json", "w+") as fp:
+    with open("11_Underlay_partition.json", "w+") as fp:
         json.dump(underlay_data_partition, fp)
-    with open("Underlay_survival.json", "w+") as fp:
+    with open("11_Underlay_survival.json", "w+") as fp:
         json.dump(underlay_data_failure, fp)
 
 def runtests_overlay():
@@ -139,4 +139,4 @@ def runtests_overlay():
     with open("Overlay_survival_11.json", "w+") as fp:
         json.dump(underlay_data_failure, fp)
 
-runtests_overlay()
+runtests_underlay()

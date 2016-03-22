@@ -1,6 +1,7 @@
 \documentclass[conference]{IEEEtran}
 
 \usepackage{geometry}
+\usepackage{graphicx}
 \geometry{letterpaper,
 top=0.75in,
 bottom=1in,
@@ -296,9 +297,30 @@ To simulate an underlay partition we randomly select the appropriate number of n
 Overlay partition failures are more difficult to simulate.
 In order to generate a partition of a given size, we will choose a random root node, and iteratively add nodes by closeness to the partition 
 
-
-
-
+\begin{figure}
+	\includegraphics[width=0.5\textwidth]{figs/underlay_kad_random}
+\end{figure}
+\begin{figure}
+	\includegraphics[width=0.5\textwidth]{figs/underlay_chord_random}
+\end{figure}
+\begin{figure}
+	\includegraphics[width=0.5\textwidth]{figs/overlay_kad_random}
+\end{figure}
+\begin{figure}
+	\includegraphics[width=0.5\textwidth]{figs/overlay_chord_random}
+\end{figure}
+\begin{figure}
+	\includegraphics[width=0.5\textwidth]{figs/underlay_kad_nearest}
+\end{figure}
+\begin{figure}
+	\includegraphics[width=0.5\textwidth]{figs/underlay_chord_nearest}
+\end{figure}
+\begin{figure}
+	\includegraphics[width=0.5\textwidth]{figs/overlay_kad_nearest}
+\end{figure}
+\begin{figure}
+	\includegraphics[width=0.5\textwidth]{figs/overlay_chord_nearest}
+\end{figure}
 
 \section{Conclusions}
 
