@@ -29,16 +29,24 @@ def Render(raw_json):
     plt.title(data["title"])
     plt.xlabel(data["x-axis"])
     plt.ylabel(data["y-axis"])
-    for label in data["plots"].keys():
+    labels = sorted(data["plots"].keys())
+    if len(labels)==10:
+        tmp = labels[1]
+        labels.remove(tmp)
+        labels.append(tmp)
+    for label in labels:
         plot_info = data["plots"][label]
         plt.plot(plot_info["x"], plot_info["y"], label=label)
-    plt.legend()
+    plt.axis([0,.9,0,1])
+    plt.legend(loc=2)
+
     if "target" in data.keys():
         # plt.draw()
         plt.savefig(data["target"])
     else:
         # plt.draw()
         plt.show()
+    plt.clf()
 
 if __name__ == "__main__":
     import sys

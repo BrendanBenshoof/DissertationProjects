@@ -102,8 +102,8 @@ def runtests_overlay():
     kad_paths = nx.all_pairs_shortest_path_length(g_kad)
 
     graphs = {"Chord":(g_chord, chord_paths) , "Kademlia":(g_kad,kad_paths) }
-    strats = {"Random K": random_k, "Nearest K": nearest_k}
-    K = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    strats = {"Random K": random_k}#"Nearest K": nearest_k
+    K = [11]
     R = [0.1 + x * 0.1 for x in range(9)]
     samples = 100
 
@@ -136,7 +136,7 @@ def runtests_overlay():
                 underlay_data_failure["plots"]["%s %s-%d Loss Chance" %
                                                (graph_name, strats_name, k)] = failure_plot
 
-    with open("Overlay_survival.json", "w+") as fp:
+    with open("Overlay_survival_11.json", "w+") as fp:
         json.dump(underlay_data_failure, fp)
 
 runtests_overlay()
