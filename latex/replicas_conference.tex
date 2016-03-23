@@ -1,5 +1,5 @@
 \documentclass[conference]{IEEEtran}
-
+\usepackage{amsmath}
 \usepackage{geometry}
 \usepackage{graphicx}
 \geometry{letterpaper,
@@ -182,12 +182,50 @@ It is worth considering, that in the case of any partition, the ideal behavior i
 An underlay partition can happen as result in a failure of infrastructure, manipulation of BGP, or governmental action.
 Assuming the overlay network of the DHT has been constructed randomly in relation to the underlay network, the failures due to the underlay partition will essentially occur at random locations in the network. 
 
+
 While this may resemble how failure occurs during churn, the failures will all occur effectively simultaneously, to a potentially very large segment of the population of the network.
 Kademlia's topology is likely to recover from such an event, however searching the network will be impaired while new connections are established.
 Chord's consistent topology proof is built upon an invariant that any join or exit from the network is occurring when the majority of the network is consistent. 
 The sudden failure of nodes in a Underlay partition situation violates this assumption and may destroy the ability of the remaining chord networks to form a searchable overlay topology.
 
 We will discuss underlay partitions in terms of a ratio $R_{u}$ that describes the fraction of randomly distributed members of the network that remain after an underlay partition occurs. 
+
+
+\subsection{Half Life and Time}
+Traditionally in statistical discussion of databases we consider ``Up Time'' as the primary metric of reliability however in a DHT, this metric does not mesh well with reality.
+Up-Time is predicated on the idea that records will never be lost, but only in fact be temporarily unavailable.
+Because a DHT sees a much higher machine failure rate than the data centers where Up-Time is the primary factor of consideration, we consider any failure that would result in the temporary loss of availability of a record to simply be an increase in latency.
+While DHTs attempt to minimize this latency, failure is more honestly measured in the likelihood a record will be lost forever.
+Because the amount of data and rate of churn is so high, we must consider that there is a likelihood that a record can be lost simply because all of the machines that held instances of the record on the network have failed (or otherwise left the network).
+
+With this in mind we use the metrics ``Half-Life'' and ``Mean Expected Lifetime''.
+Half-Life is a unit of measure commonly used in Physics and chemistry and it describes the amount of time over which there is a 50\% chance that a item has ceased to exist (in the current state).
+This is useful for discussing the lifetime of records in the network because we can calculate the likelihood a replica is lost due to churn over any given period of time and then use this to calculate the half life using the equation in equation \ref{halflifeequation}.
+It is important to note while it seems there is no clear time period for the results of this equation that it is in terms of multiples of sampling period of $R$.
+
+\begin{equation}
+\frac{-\log(2)}{\log(1-R_{period})}
+\label{halflifeequation}
+\end{equation}
+
+Given a R sampled in a given period, we can convert from the original period ($Period_{A}$) it to a smaller or larger period ($Period_{B}$) by applying equation \ref{eqconvert}.
+This will allow us to consider the likelihood of failure over a period when a replica may be particularly vulnerable.
+
+\begin{equation}
+R_{Period_{B}}=1-(1-(R_{Period_{A}})^{\frac{Period_{B}}{Period_{A}}})
+\label{eqconvert}
+\end{equation}
+ 
+For a single record, the half-life would represent the average expected lifetime.
+For a population of replicas, the half-life would represent the period of which half of the records are expected to have been lost.
+For such a population, the mean expected lifetime would describe the period required to reduce the average number of replicas to 1 (which would describe a 50\% chance of total loss).
+For a population of $K$ records the mean expected lifetime in multiples of the period of $R$ can be calculated using equation \ref{eqlifetime}
+
+\begin{equation}
+\frac{-\log(K)}{\log(1-R_{period})}
+\label{eqlifetime}
+\end{equation}
+
 
 \section{Passive Replication Strategies}
 
@@ -326,6 +364,12 @@ Using modifications of strategies presented in 2002 by Kademlia\cite{kademlia}, 
 \end{figure}
 \begin{figure}[h]
 	\includegraphics[width=0.5\textwidth]{figs/overlay_chord_nearest}
+\end{figure}
+\begin{figure}[h]
+	\includegraphics[width=0.5\textwidth]{figs/lifetime}
+\end{figure}
+\begin{figure}[h]
+	\includegraphics[width=0.5\textwidth]{figs/self_healing}
 \end{figure}
 
 \bibliography{mine}
