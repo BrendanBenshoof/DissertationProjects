@@ -103,11 +103,6 @@ In this paper, we will consider a selection of strategies to increase robustness
 Each strategy will be described, analyzed and finally compared and contrasted with other strategies.
 
 
-Current DHTs are oprimized to store a large number of smaller records.
-While is it is perfectly viable to link together such records to store larger files (and even use it as a shared file system), it has generally been used as a layer of indirection and provides means of discovering high bandwidth protocols. For example, Bitorent uses a DHT to help find peers for particular torrent rather than storing the files directly on the DHT.
-If we maintain this trend of only storing small records on the DHT, it stands out as a clear choice for use a shared DNS cache, or as a mechanism for storing encrypted cryptographic keys.
-All of these  use cases are predicated on a DHT being a reliable store of data.
-
 \section{Technical Background}
 \subsection{What is a DHT?}
 At the core of maintaining a distributed system is establishing a shared state in the form of a table of key-value pairs.
@@ -128,10 +123,10 @@ Sadly these proofs have been shown to be incorrect\cite{} without serious modifi
 \subsubsection{Kademlia}
 
 Kademlia is the most popular DHT methodology. 
-It powers the trackerless bittorent mainline DHT, and the C implementation related to that project is likely the greatest cause of it's popularity.
+It powers the tracker-less bittorent mainline DHT, and the C implementation related to that project is likely the greatest cause of it's popularity.
 many other distributed systems utilize modified versions of Kademlia as a means of peer management and as a key-value store.
 
-Kademlia is built in a non-eucldian metric space. 
+Kademlia is built in a non-euclidean metric space. 
 Locations are represented by a large integer (160 bit is most common) and the distance between locations is calculated by the XOR metric.
 This means Kademlia's metric space is a generalization of a binary tree, where the locations are mapped to leaf nodes and distance between nodes is the distance required to traverse between them on that tree.
 
