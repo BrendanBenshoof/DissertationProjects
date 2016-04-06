@@ -185,7 +185,7 @@ def unit(v):
     norm_mag = sum(map(lambda x: x * x, v))**0.5
     if norm_mag == 0.0:
         return v
-    return v / norm_mag
+    return np.array(v) * (1.0 / norm_mag)
 """
 poincare_origin = (0.95,0.0)
 center = poincareTo3d(*poincare_origin)
@@ -276,8 +276,8 @@ def build_hyperbolic_overlay(nodes, locs):
         for p in peers:
             new_g.add_edge(a, p)
 
-    nx.draw(new_g, pos=locs)
-    plt.show()
+    #nx.draw(new_g, pos=locs)
+    # plt.show()
     return new_g
 
 
@@ -294,7 +294,7 @@ def areRoutesGreedy(nodes, locs, path_lengths):
     # nodes = overlay_graph.nodes()[:]
     strech = 0.0
     hops = 0
-    # total_path_length = 0
+    total_path_length = 0
     for a in random.sample(nodes, min((100, len(nodes)))):
         for b in random.sample(nodes, min((100, len(nodes)))):
             if a == b:
@@ -302,11 +302,12 @@ def areRoutesGreedy(nodes, locs, path_lengths):
             count = 0
             pointer = a
             while pointer != b:
-                hops += 1
+
                 options = overlay_graph.neighbors(pointer)
                 # print(a, pointer, options)
                 closest = min(options, key=lambda x: poincareDist(locs[x], locs[b]))
-                count += path_lengths[pointer][closest]
+                count += 1  # path_lengths[pointer][closest]
+                hops += path_lengths[pointer][closest]
                 pointer = closest
                 if count > len(nodes):
                     print("infinte loop. tis bad")
@@ -316,6 +317,7 @@ def areRoutesGreedy(nodes, locs, path_lengths):
                 greedy_paths += 1
             # total_path_length += path_lengths[a][b]
             strech += count / path_lengths[a][b]
+            total_path_length += count
             total_paths += 1
     # average_path_length = total_path_length/total_paths
 
@@ -323,7 +325,10 @@ def areRoutesGreedy(nodes, locs, path_lengths):
     print(greedy_paths, "Are prefectly efficent")
     print(failed, "totally failed")
     print(hops / total_paths, "average hops")
-    print(hops / total_paths * math.log(len(nodes)) /
+    mean_underlay_dist = sum([sum([path_lengths[a][b] for b in nodes])
+                              for a in nodes]) / (len(nodes)**2.0)
+
+    print(mean_underlay_dist * math.log(len(nodes)) /
           math.log(2), "expected path length in regular DHT")
 
 
@@ -334,7 +339,7 @@ def hyperbolic_fit(keys, distances):
     delta_error = 1.0
     while delta_error > 0.001:
         # yield {k: poincareFrom3d(point_locs[k]) for k in keys}
-        print(t)
+        # print(t)
         new_locs = {}
         for k in keys:
             new_locs[k] = calculate_jiggle(point_locs[k], point_locs,
@@ -366,7 +371,7 @@ def smart_hyperbolic_fit(keys, g):
                for i in range(0, len(sorted__by_degree), batch_size)]
     i = 0
     for batch in batches:
-        print(i, batch)
+        #print(i, batch)
         i += 1
         new_point_locs = {}
         if len(final_point_locs.keys()) > 0:
@@ -388,7 +393,7 @@ def smart_hyperbolic_fit(keys, g):
                 x = final_point_locs[parent][0] + math.cos(parent_angle + child_angle) * r
                 y = final_point_locs[parent][1] + math.sin(parent_angle + child_angle) * r
                 z = -1 * (x * x + y * y + 1.0)**0.5
-                print(x, y, z)
+                #print(x, y, z)
                 new_point_locs[b] = (x, y, z)
                 placed.append(b)
         else:
@@ -405,7 +410,7 @@ def smart_hyperbolic_fit(keys, g):
 
         while delta_error > 0.01 and t > 0.01:
             # yield {k: poincareFrom3d(point_locs[k]) for k in keys}
-            print(t)
+            # print(t)
             for k in batch:
                 new_point_locs[k] = calculate_jiggle(new_point_locs[k], locs,
                                                      distances[k], t)
@@ -418,7 +423,7 @@ def smart_hyperbolic_fit(keys, g):
                     ideal = distances[a][b]
                     error += (ideal - actual)**2.0
             new_error = error / len(g.nodes())**2.0
-            print("error", new_error)
+            #print("error", new_error)
             delta_error = math.fabs(new_error - last_error)
             last_error = new_error
             for b in batch:
@@ -427,16 +432,15 @@ def smart_hyperbolic_fit(keys, g):
         final_point_locs.update(locs)
     return {k: poincareFrom3d(final_point_locs[k]) for k in keys}
 
-g, test_dist = scale_free_topology(500)
+g, test_dist = scale_free_topology(2048)
 
-nodes = random.sample(g.nodes(), 500)
-pos = smart_hyperbolic_fit(nodes, g)
+for size in [32, 64, 128, 256, 512, 1024, 2048]:
+    print("\nSize %d" % size)
+    nodes = random.sample(g.nodes(), size)
+    pos = smart_hyperbolic_fit(nodes, g)
+
+    areRoutesGreedy(nodes,  pos, test_dist)
 
 
-areRoutesGreedy(nodes,  pos, test_dist)
-
-
-nx.draw(g, pos=pos, nodelist=nodes, labels={k: "%d" % (k) for k in g.nodes()})
-plt.show()
-
-# In[ ]:
+#nx.draw(g, pos=pos, nodelist=nodes, labels={k: "%d" % (k) for k in g.nodes()})
+# plt.show()
