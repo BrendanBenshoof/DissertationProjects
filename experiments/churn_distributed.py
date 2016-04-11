@@ -34,7 +34,9 @@ def poincare_dist_from_3d(a, b):
         return 0.0
     return math.acosh(a[2] * b[2] - a[0] * b[0] - a[1] * b[1])
 
-    # return poincareDist(poincareFrom3d(a), poincareFrom3d(b))
+
+def dist(a, b):
+    return poincareFrom3d(a, b)
 
 
 def poincareFrom3d(v):
@@ -229,10 +231,9 @@ def spring_force(actual, ideal):
 
 def calculate_jiggle(center, point_dict, ideal_distances, t):
     keys = [k for k in point_dict if ideal_distances[k] > 0]
-    #poincare_center = poincareFrom3d(center)
-    #poincare_points = {k: poincareFrom3d(point_dict[k]) for k in keys}
-    # actually just hyperbolic distances, we don't need poincare anymore
-    poincare_distances = {k: poincare_dist_from_3d(point_dict[k], center) for k in keys}
+    poincare_center = poincareFrom3d(center)
+    poincare_points = {k: poincareFrom3d(point_dict[k]) for k in keys}
+    poincare_distances = {k: poincareDist(poincare_points[k], poincare_center) for k in keys}
     norm_plane = get_tangent_plane(center)
     normal_vector = np.array(norm_plane[:3])
     proj_points = {k: closest_point_on_plane(point_dict[k], norm_plane) for k in keys}
@@ -275,7 +276,7 @@ def dist(a, b):
 def subordinate_loc(patron):
     r = 0.5 + random.random() * 0.5
     # #print(patron)
-    patron_r = poincareDist((0, 0), poincareFrom3d(patron.get_loc()))
+    patron_r = poincare_dist_from_3d((0, 0, -1), patron.get_loc())
     angle = 2 * math.pi * random.random()
     if patron_r > 0.0:
         angle = 0.5 * ((random.random() - 0.5) * math.pi)
@@ -335,6 +336,7 @@ def areRoutesGreedy(g, locs, path_lengths):
 
     print(mean_underlay_dist * math.log(len(nodes)) /
           math.log(2), "expected path length in regular DHT")
+    return (hops / total_paths) / mean_underlay_dist
 
 
 class Network(object):
@@ -368,6 +370,7 @@ class Node(object):
         self.net = network
         self.short_peers = {}
         self.long_peers = {}
+        self.isdead = True
 
     def __repr__(self):
         return "<NODE %d at %s>" % (self.id, str(self.loc))
@@ -443,6 +446,10 @@ class Node(object):
         peers.update(self.short_peers)
         if len(peers.keys()) == 0:
             return
+        to_remove = []
+        for p in list(peers.keys()):
+            if p.isdead:
+                del peers[p]
         new_short_peers = []
         new_long_peers = []
         long_peer_canidates = []
@@ -468,48 +475,67 @@ class Node(object):
         self.loc = calculate_jiggle(self.loc, {p: p.loc for p in self.short_peers.keys()}, {
             p: self.net.ping(self, p) for p in self.short_peers.keys()}, 0.1)
 
+import matplotlib.pyplot as plt
 graph, latency = scale_free_topology(1000)
 
-for size in range(50, 1000, 50):
-    #    UNDERLAY_SIZE = 10 * size
 
-    OVERLAY_SIZE = size
-    centrality = nx.betweenness_centrality(graph)
-    nodes = sorted(random.sample(graph.nodes(), OVERLAY_SIZE), key=lambda x: centrality[x])
-    net = Network()
-    start = nodes.pop()
-    origin = Node(start, net)
-    origin.loc = (0, 0, -1)
-    net.add_Node(origin, latency[0])
+OVERLAY_SIZE = 100
+centrality = nx.betweenness_centrality(graph)
+nodes = sorted(random.sample(graph.nodes(), OVERLAY_SIZE), key=lambda x: centrality[x])
+other_nodes = list(set(graph.nodes()).difference(set(nodes)))
 
-    j = 0
-    while(len(nodes) > 0):
-        # print(j)
-        j += 1
-        i = nodes.pop()
-        # #print(i)
+net = Network()
+start = nodes.pop()
+origin = Node(start, net)
+origin.isdead = False
+origin.loc = (0, 0, -1)
+net.add_Node(origin, latency[0])
+
+j = 0
+while(len(nodes) > 0):
+    # print(j)
+    j += 1
+    i = nodes.pop()
+    # #print(i)
+    new_node = Node(i, net)
+    new_node.isdead = False
+    latencies = latency[i]  # {k: random.random() for k in net.nodes.keys()}
+    latencies[i] = 0.0
+    net.add_Node(new_node, latencies)
+    new_node.join()
+    # for n in net.nodes.keys():
+    #    net.nodes[n].tick()
+    # new_node.update_loc()
+    # #pint(new_node.loc)
+with open("churn.log", "w") as fp:
+    for i in range(10000):
+        to_kill = random.choice(list(net.nodes.keys()))
+        net.nodes[to_kill].isdead = True
+        del net.nodes[to_kill]
+        to_add = random.choice(other_nodes)
+        other_nodes.append(to_kill)
+        other_nodes.remove(to_add)
         new_node = Node(i, net)
-        latencies = latency[i]  # {k: random.random() for k in net.nodes.keys()}
-        latencies[i] = 0.0
+        new_node.isdead = False
+        latencies = latency[to_add]  # {k: random.random() for k in net.nodes.keys()}
+        latencies[to_add] = 0.0
         net.add_Node(new_node, latencies)
         new_node.join()
-        # for n in net.nodes.keys():
-        #    net.nodes[n].tick()
-        # new_node.update_loc()
-        # #pint(new_node.loc)
-    for i in range(10):
-        # print(i)
-        for n in net.nodes.keys():
-            net.nodes[n].tick()
+        for j in range(3):
+            for n in net.nodes.keys():
+                net.nodes[n].tick()
+        print("\nchurn step", i)
+        g = nx.DiGraph()
+        g.add_nodes_from(net.nodes.keys())
+        for n in g.nodes():
+            peers = net.nodes[n].getAllPeers()
+            for p in peers.keys():
+                if p.id in g.nodes():
+                    g.add_edge(n, p.id)
 
-    g = nx.DiGraph()
-    g.add_nodes_from(net.nodes.keys())
-    for n in g.nodes():
-        peers = net.nodes[n].getAllPeers()
-        for p in peers.keys():
-            g.add_edge(n, p.id)
-    pos = {net.nodes[k].loc for k in g.nodes()}
-
-    print("\n")
-    print(size, "SIZE")
-    areRoutesGreedy(g, pos, latency)
+        pos = {k: net.nodes[k].loc for k in g.nodes()}
+        #nx.draw(g, pos=pos)
+        # plt.show()
+        s = areRoutesGreedy(g, pos, latency)
+        fp.write("%f,\n" % s)
+        fp.flush()

@@ -276,8 +276,8 @@ def build_hyperbolic_overlay(nodes, locs):
         for p in peers:
             new_g.add_edge(a, p)
 
-    #nx.draw(new_g, pos=locs)
-    # plt.show()
+    nx.draw(new_g, pos=locs)
+    plt.show()
     return new_g
 
 
@@ -432,9 +432,9 @@ def smart_hyperbolic_fit(keys, g):
         final_point_locs.update(locs)
     return {k: poincareFrom3d(final_point_locs[k]) for k in keys}
 
-g, test_dist = scale_free_topology(2048)
+g, test_dist = scale_free_topology(100)
 
-for size in [32, 64, 128, 256, 512, 1024, 2048]:
+for size in [32]:
     print("\nSize %d" % size)
     nodes = random.sample(g.nodes(), size)
     pos = smart_hyperbolic_fit(nodes, g)
