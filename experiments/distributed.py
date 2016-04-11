@@ -30,7 +30,11 @@ def poincareTo3d(x, y):
 
 
 def poincare_dist_from_3d(a, b):
-    return poincareDist(poincareFrom3d(a), poincareFrom3d(b))
+    if a == b:
+        return 0.0
+    return math.acosh(a[2] * b[2] - a[0] * b[0] - a[1] * b[1])
+
+    # return poincareDist(poincareFrom3d(a), poincareFrom3d(b))
 
 
 def poincareFrom3d(v):
@@ -225,9 +229,10 @@ def spring_force(actual, ideal):
 
 def calculate_jiggle(center, point_dict, ideal_distances, t):
     keys = [k for k in point_dict if ideal_distances[k] > 0]
-    poincare_center = poincareFrom3d(center)
-    poincare_points = {k: poincareFrom3d(point_dict[k]) for k in keys}
-    poincare_distances = {k: poincareDist(poincare_points[k], poincare_center) for k in keys}
+    #poincare_center = poincareFrom3d(center)
+    #poincare_points = {k: poincareFrom3d(point_dict[k]) for k in keys}
+    # actually just hyperbolic distances, we don't need poincare anymore
+    poincare_distances = {k: poincare_dist_from_3d(point_dict[k], center) for k in keys}
     norm_plane = get_tangent_plane(center)
     normal_vector = np.array(norm_plane[:3])
     proj_points = {k: closest_point_on_plane(point_dict[k], norm_plane) for k in keys}
