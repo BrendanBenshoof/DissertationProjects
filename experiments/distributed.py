@@ -468,9 +468,9 @@ class Node(object):
         self.loc = calculate_jiggle(self.loc, {p: p.loc for p in self.short_peers.keys()}, {
             p: self.net.ping(self, p) for p in self.short_peers.keys()}, 0.1)
 
-graph, latency = scale_free_topology(1000)
+graph, latency = scale_free_topology(10000)
 
-for size in range(50, 1000, 50):
+for size in range(500, 10000, 500):
     #    UNDERLAY_SIZE = 10 * size
 
     OVERLAY_SIZE = size

@@ -508,14 +508,14 @@ while(len(nodes) > 0):
     # new_node.update_loc()
     # #pint(new_node.loc)
 with open("churn.log", "w") as fp:
-    for i in range(10000):
+    for i in range(1000):
         to_kill = random.choice(list(net.nodes.keys()))
         net.nodes[to_kill].isdead = True
         del net.nodes[to_kill]
         to_add = random.choice(other_nodes)
         other_nodes.append(to_kill)
         other_nodes.remove(to_add)
-        new_node = Node(i, net)
+        new_node = Node(to_add, net)
         new_node.isdead = False
         latencies = latency[to_add]  # {k: random.random() for k in net.nodes.keys()}
         latencies[to_add] = 0.0
