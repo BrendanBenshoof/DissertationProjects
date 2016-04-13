@@ -34,9 +34,7 @@ def poincare_dist_from_3d(a, b):
         return 0.0
     return math.acosh(a[2] * b[2] - a[0] * b[0] - a[1] * b[1])
 
-
-def dist(a, b):
-    return poincareFrom3d(a, b)
+    # return poincareDist(poincareFrom3d(a), poincareFrom3d(b))
 
 
 def poincareFrom3d(v):
@@ -231,9 +229,10 @@ def spring_force(actual, ideal):
 
 def calculate_jiggle(center, point_dict, ideal_distances, t):
     keys = [k for k in point_dict if ideal_distances[k] > 0]
-    poincare_center = poincareFrom3d(center)
-    poincare_points = {k: poincareFrom3d(point_dict[k]) for k in keys}
-    poincare_distances = {k: poincareDist(poincare_points[k], poincare_center) for k in keys}
+    #poincare_center = poincareFrom3d(center)
+    #poincare_points = {k: poincareFrom3d(point_dict[k]) for k in keys}
+    # actually just hyperbolic distances, we don't need poincare anymore
+    poincare_distances = {k: poincare_dist_from_3d(point_dict[k], center) for k in keys}
     norm_plane = get_tangent_plane(center)
     normal_vector = np.array(norm_plane[:3])
     proj_points = {k: closest_point_on_plane(point_dict[k], norm_plane) for k in keys}
@@ -274,9 +273,9 @@ def dist(a, b):
 
 
 def subordinate_loc(patron):
-    r = 1.0 + random.random() * 0.5
+    r = 0.5 + random.random() * 0.5
     # #print(patron)
-    patron_r = poincare_dist_from_3d((0, 0, -1), patron.get_loc())
+    patron_r = poincareDist((0, 0), poincareFrom3d(patron.get_loc()))
     angle = 2 * math.pi * random.random()
     if patron_r > 0.0:
         angle = 0.5 * ((random.random() - 0.5) * math.pi)
@@ -295,10 +294,6 @@ def areRoutesGreedy(g, locs, path_lengths):
     total_paths = 0
     failed = 0
     overlay_graph = g  # build_hyperbolic_overlay(nodes, locs)
-    #nx.draw(g, pos={k: poincareFrom3d(locs[k]) for k in locs.keys()})
-    # plt.show()
-    point_distances = []
-    blarg_path_lengths = []
     # culled = random.sample(nodes, 20)
     # overlay_graph.remove_nodes_from(culled)
     # nodes = overlay_graph.nodes()[:]
@@ -307,45 +302,29 @@ def areRoutesGreedy(g, locs, path_lengths):
     total_path_length = 0
     for a in random.sample(nodes, min((100, len(nodes)))):
         for b in random.sample(nodes, min((100, len(nodes)))):
-            #print(a, b)
-            this_hops = 0
             if a == b:
                 continue
-            p_dist = poincare_dist_from_3d(locs[a], locs[b])
             count = 0
             pointer = a
             while pointer != b:
 
                 options = overlay_graph.neighbors(pointer)
-                #print(a, b, count)
-                # print(len(options))
                 # #print(a, pointer, options)
                 closest = min(options, key=lambda x: poincare_dist_from_3d(locs[x], locs[b]))
-                if path_lengths[pointer][closest] == 0:
-                    print("is", a, b, "?")
-                    break
                 count += 1  # path_lengths[pointer][closest]
-                this_hops += path_lengths[pointer][closest]
+                hops += path_lengths[pointer][closest]
                 pointer = closest
                 if count > len(nodes):
-                    print("infinte loop. tis bad")
+                    # print("infinte loop. tis bad")
                     failed += 1
                     break
-            if this_hops == path_lengths[a][b]:
+            if count == path_lengths[a][b]:
                 greedy_paths += 1
             # total_path_length += path_lengths[a][b]
-            strech += this_hops / path_lengths[a][b]
-            hops += this_hops
+            strech += count / path_lengths[a][b]
             total_path_length += count
             total_paths += 1
-            point_distances.append(this_hops / path_lengths[a][b])
-            blarg_path_lengths.append(p_dist)
     # average_path_length = total_path_length/total_paths
-
-    #n, bins, patches = plt.hist(point_distances)
-    # add a 'best fit' line
-
-    # plt.show()
 
     print(total_paths, "Paths")
     print(greedy_paths, "Are prefectly efficent")
@@ -353,10 +332,11 @@ def areRoutesGreedy(g, locs, path_lengths):
     print(hops / total_paths, "average hops")
     mean_underlay_dist = sum([sum([path_lengths[a][b] for b in nodes])
                               for a in nodes]) / (len(nodes)**2.0)
-    mean_hyperbolic_distance = sum(point_distances) / len(point_distances)
-    print(mean_underlay_dist * math.log(len(nodes)) /
-          math.log(2), "expected path length in regular DHT")
-    return (hops / total_paths) / mean_underlay_dist, mean_underlay_dist, mean_hyperbolic_distance
+    print(mean_underlay_dist, "ideal average hops")
+    print((hops / total_paths) / mean_underlay_dist, "stretch")
+
+    # print(mean_underlay_dist * math.log(len(nodes)) /
+    # math.log(2), "expected path length in regular DHT")
 
 
 class Network(object):
@@ -390,7 +370,6 @@ class Node(object):
         self.net = network
         self.short_peers = {}
         self.long_peers = {}
-        self.isdead = True
 
     def __repr__(self):
         return "<NODE %d at %s>" % (self.id, str(self.loc))
@@ -466,10 +445,6 @@ class Node(object):
         peers.update(self.short_peers)
         if len(peers.keys()) == 0:
             return
-        to_remove = []
-        for p in list(peers.keys()):
-            if p.isdead:
-                del peers[p]
         new_short_peers = []
         new_long_peers = []
         long_peer_canidates = []
@@ -495,19 +470,17 @@ class Node(object):
         self.loc = calculate_jiggle(self.loc, {p: p.loc for p in self.short_peers.keys()}, {
             p: self.net.ping(self, p) for p in self.short_peers.keys()}, 0.1)
 
-import matplotlib.pyplot as plt
 graph, latency = scale_free_topology(1000)
 
+print("underlay generated")
 
-OVERLAY_SIZE = 100
+size = 500
+OVERLAY_SIZE = size
 centrality = nx.betweenness_centrality(graph)
 nodes = sorted(random.sample(graph.nodes(), OVERLAY_SIZE), key=lambda x: centrality[x])
-other_nodes = list(set(graph.nodes()).difference(set(nodes)))
-
 net = Network()
 start = nodes.pop()
 origin = Node(start, net)
-origin.isdead = False
 origin.loc = (0, 0, -1)
 net.add_Node(origin, latency[0])
 
@@ -518,7 +491,6 @@ while(len(nodes) > 0):
     i = nodes.pop()
     # #print(i)
     new_node = Node(i, net)
-    new_node.isdead = False
     latencies = latency[i]  # {k: random.random() for k in net.nodes.keys()}
     latencies[i] = 0.0
     net.add_Node(new_node, latencies)
@@ -527,36 +499,32 @@ while(len(nodes) > 0):
     #    net.nodes[n].tick()
     # new_node.update_loc()
     # #pint(new_node.loc)
+for i in range(10):
+    # print(i)
+    for n in net.nodes.keys():
+        net.nodes[n].tick()
 
-with open("null.log", "w") as fp:
-    for i in range(1000):
-        to_kill = random.choice(list(net.nodes.keys()))
-        net.nodes[to_kill].isdead = True
-        del net.nodes[to_kill]
-        to_add = random.choice(other_nodes)
-        other_nodes.append(to_kill)
-        other_nodes.remove(to_add)
-        new_node = Node(to_add, net)
-        new_node.isdead = False
-        latencies = latency[to_add]  # {k: random.random() for k in net.nodes.keys()}
-        latencies[to_add] = 0.0
-        net.add_Node(new_node, latencies)
-        new_node.join()
-        for j in range(3):
-            for n in net.nodes.keys():
-                net.nodes[n].tick()
-        print("\nchurn step", i)
-        g = nx.DiGraph()
-        g.add_nodes_from(net.nodes.keys())
-        for n in g.nodes():
-            peers = net.nodes[n].getAllPeers()
-            for p in peers.keys():
-                if p.id in g.nodes():
-                    g.add_edge(n, p.id)
+g_short = nx.DiGraph()
+g_short.add_nodes_from(net.nodes.keys())
+g_long = nx.DiGraph()
+g_long.add_nodes_from(net.nodes.keys())
+for n in g_short.nodes():
+    peers = net.nodes[n].getPeers()
+    for p in peers.keys():
+        g_short.add_edge(n, p.id)
+    peers = net.nodes[n].getAllPeers()
+    for p in peers.keys():
+        g_long.add_edge(n, p.id)
 
-        pos = {k: net.nodes[k].loc for k in g.nodes()}
-        #nx.draw(g, pos=pos)
-        # plt.show()
-        s, d, hd = areRoutesGreedy(g, pos, latency)
-        fp.write("%f,%f,%f\n" % (d, s, hd))
-        fp.flush()
+
+short_congestion = nx.betweenness_centrality(g_short)
+short_congestionlist = [short_congestion[k] for k in short_congestion.keys()]
+
+long_congestion = nx.betweenness_centrality(g_long)
+long_congestionlist = [long_congestion[k] for k in long_congestion.keys()]
+import matplotlib.pyplot as plt
+
+bins = [0.01 * x for x in range(100)]
+
+plt.hist([short_congestionlist, long_congestionlist], bins)
+plt.show()
