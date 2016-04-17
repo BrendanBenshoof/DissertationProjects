@@ -6,46 +6,44 @@
 
 \chapter{Introduction}
 
+As more and more systems are growing using existing P2P technology, we are building services usable by the public (and exploring even more possibilities) based on a P2P system called a Distributed Hash Table.
+While current Distributed Hash Tables are an incredible effective and robust solution to maintain a shared state in a P2P system in a scalable fashion, little to no improvement has been provided over the initial Chord\cite{chord} and Kademlia\cite{kademlia} DHTs.
+This dissertation explores improvements and applications of Distributed Hash Tables to provide the capacity for future robust and distributed systems infrastructures and services.
 
-\section{The Problem}
+\section{The Ship of Theseus}
 
-I am setting forth to solve two problems in the space of decentralized services. That such services compete for infrastructures and provide high barriers to adoption even for those technically inclined and that current decentralized service overlay topologies are wasteful in management fo latency on congestion.
+\blockquote{The ship wherein Theseus and the youth of Athens returned from Crete had thirty oars, and was preserved by the Athenians down even to the time of Demetrius Phalereus, for they took away the old planks as they decayed, putting in new and stronger timber in their places, in so much that this ship became a standing example among the philosophers, for the logical question of things that grow; one side holding that the ship remained the same, and the other contending that it was not the same.
 
-Most p2p systems require/leverage a core infrastructure for peer selection and maintaining shared state.
-The most commonly used such system is a Distributed Hash Table\cite{chord}.
-It allows networks to discover other peers in an organized fashion and to provide the network a shared "key-value" store.
-Because many networks implement and run their own DHT networks and protocols, they cannot benefit from a shared infrastructure beyond that of the Internet itself.
-This is reasonable cost because each network has differing use cases and makes different assumptions about the capabilities of every node in its own network.
-% (for example cjdns assumes all dht nodes also run the cjdn service)
+-Plutarch, Theseus
 
-Current technologies utilize network topologies built on metric spaces intended to facilitate a O(log(n)) diameter, with the partially correct assumption that this will also minimize the amount of time required to preform a lookup on the network. 
-Because these topologies are constructed without regard to the underlying network, they often provide grossly inefficient paths through the underlay network when following a short overlay network path.
+}
 
 
-\section{My Proposal}
+What has attracted my design and applications of Distributed Hash Tables is that they encourage thinking on a global (or larger) scale and require designs that operate with minimal human intervention on time scales beyond those normally considered by computer science.
 
-While the problems presented are not strictly connected, they are bothing being considered because they share a solution.
-Changing the foundational assumptions of distributed hash tables give us opportunity to change their practical and perceived utility.
-I intend to research, propose, and develop a successor technology to current 'Distributed Hash Tables' (Kademlia, Chord, CAN) in the form of a 'Decentralized Infrastructure Network' (working name).
-This technology will provide increased performance, facilitate the use of current and new p2p distributed systems, and provide a distributed infrastructure for new p2p client-side applications in Server, PC, Browser, and Mobile environments.
+In traditional engineering and design we conceive of an object, that while having parts replaced in the course of maintenance, will largely remain a single static object comprised of the same material of which it was formed until it is disposed of.
+When considering a Distributed Hash Table, we are intentionally designing a system like the Ship of Theseus, where on the scale of millions of devices are added and lost on a daily basis, often amounting to up to half of the constituent parts of a globe spanning system being replaced in a day.
+It is our task to design a pattern of behavior for each of these parts that allows the system to respond to queries despite constant in-progress failure and replacement and to constantly propagate the information stored in the system onward to new storage before the current storage fails. 
 
-This successor technology would be similar to current Distributed Hash tables in many ways: It will build a p2p overlay routing network, it will utilize a 'metric space' and hash functions to assign locations to nodes and records, it will Utilize a similar but simplified network protocol and maintenance cycle.
+Despite the challenge involved in building such a system, barring dramatic change to our expectations of the future, the existing Distributed Hash Tables will be able to persist as a public utility indefinitely.
+I present that the answer to the Paradox of the Ship of Theseus is, "I don't care as long as the ship still floats".
 
-The important differences from established will be:
+\section{Goals}
 
+The goals of the papers making up this dissertation are straightforward.
+Four subjects concerning DHTs are open and meriting improvement, generalization, application, efficiency, and robustness. 
 \begin{itemize}
-\item Differentiation between 'Clients' and 'Servers' which allows users to utilize the network without contributing
-\item Abstraction of the 'Peer selection metrics' which will allow us to research and examine optimal solutions to our use case.
-\item Support for service specific 'subnetworks' that will allow existing p2p systems to leverage the DIN.
-\item Provide a multiple-use 'reusable' network infrastructure to allow for easier entry for software developers into the p2p distributed systems space.
-\item Utilize the abstract 'metrics' to minimize lookup latency while preserving low maintenance costs, particularly Hyperbolic metrics.
+
+\item DGVH and UrDHT present ideas to generalize our model of "What is a Distributed Hash Table" beyond the current proposed methods into a continuum of viable DHT methods which we can explore for ideal properties. 
+
+\item ChordReduce is concerned with application of a DHT to act as an organizing mechanism for a traditional distributed computing paradigm, but with viability at larger scales of operation and duration.
+
+\item Hyperbolic DHTs utilize the generalized model of distributed hash tables to realize the idea of using a hyperbolic coordinate space to improve DHT efficiency that has existed in theory for about a decade.
+
+\item New replication strategies will allow DHTs to store records with essentially zero loss on any time scale the implementers deem appropriate for their uses. 
+
+
 \end{itemize}
-
-
-
-
-
-
 
 
 
