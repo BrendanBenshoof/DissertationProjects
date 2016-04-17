@@ -3,6 +3,8 @@
 
 \begin{center}
 Andrew Rosen \qquad Brendan Benshoof  \qquad Robert W. Harrison \qquad Anu G. Bourgeois
+
+Published ICA Conference 2014
 \end{center}
 
 
@@ -41,29 +43,6 @@ We used Chord\cite{chord}, a peer-2-peer distributed hash table, as the backbone
 \section{Background}
 ChordReduce takes its name from the two components it is built upon.  Chord\cite{chord} provides the backbone for the network and the file system, providing scalable routing, distributed storage, and fault-tolerance.   MapReduce runs on top of the Chord network and utilizes the underlying features of the distributed hash table.  This section provides background on Chord and MapReduce.
 
-\subsection{Chord}
-Chord\cite{chord} is a peer-to-peer (P2P) protocol for file sharing and distributed storage that guarantees a high probability $\log_{2} N$ lookup time for a particular node or file in the network. 
-It is highly fault-tolerant to node failures and churn, the constant joining and leaving of nodes.  It scales extremely well and the network requires little maintenance to handle individual nodes.  
-Files in the network are distributed evenly among its members.
-
-As a distributed hash table (DHT), each member of the network and the data stored on the network is mapped to a unique $m$-bit key or ID, corresponding to one of  $2^m$ locations on a ring. 
-The ID of a node and the node itself are referred to interchangeably.
-
-In a traditional Chord network, all messages travel in one direction - upstream, hopping from one node to another with a greater ID until it wraps around.
-A node in the network is responsible for all the data with keys \textit{above or upstream} his predecessor, up through and including its own ID.  If a node is responsible for some key, it is referred to being the successor of that key.
-
-Robustness in the network is accomplished by having nodes backup their contents to their $s$ (often 1) immediate successors, the closest nodes upstream.  
-This is done because when a node leaves the or fail, the most immediate successor would be responsible for the content its content.
-
-Each node maintains a table of $m$ shortcuts to other peers, called the finger table.   The $i$th entry of a node $n$'s finger table corresponds to the node that is the successor of the key $n+2^{i-1} \mod 2^m $.  Nodes route messages to the finger that is closest to the sought key without going past it, until it is received by the responsible node.  This provides Chord with a highly scalable $\log_2(N)$ lookup time for any key\cite{chord}.
-
-As nodes enter and leave the ring, the nodes use their maintenance procedures to guide them into the right place and repair any links with failed nodes.  Full details on Chord's maintenance cycle are beyond the scope of this paper and can be found here\cite{chord}.
-
-\begin{figure}
-    \includegraphics[width=\linewidth]{chordreal}
-    \caption{A Chord ring 16 nodes where $m=4$.  The bold lines are incoming edges.  Each node has a connection to its successor, as well as 4 fingers, some of which are duplicates.}
-    \label{chordreal}
-\end{figure}
 
 
 \subsection{MapReduce}
@@ -71,8 +50,6 @@ At its core, MapReduce \cite{mapreduce} is a system for division of labor, provi
 
 The archetypal example of using MapReduce is counting the occurrence of each word in a collection of documents, called WordCount.  These documents have been split up into blocks and stored on the network over the distributed file system.  The master node locates the worker nodes with blocks and sends the Map and Reduce tasks associated with WordCount.  Each worker then goes through their blocks and creates a small word frequency list.  These lists are then used by other workers, who combine them into larger and larger lists, until the master node is left with a word frequency list of all the words in the documents. 
 %The master node splits up the documents into multiple blocks and sends them off to workers.  
-
-\textit{Insert psuedocode or picture, code for word count here!}
 
 
 The most popular platform for MapReduce is Hadoop \cite{Hadoop}. Hadoop is an open-source Java implementation developed by Apache and Yahoo! \cite{pavlo2009comparison}.  Hadoop has two components, the Hadoop Distributed File System (HDFS) \cite{hdfs} and the Hadoop MapReduce Framework \cite{mrsurvey}.  Under HDFS, nodes are arranged in a hierarchical tree, with a master node, called the NameNode, at the top.  The NameNode's job is to organize and distribute information to the slave nodes, called DataNodes.  This makes the NameNode a single point of failure \cite{shvachko2010hadoop} in the network, as well as a potential bottleneck for the system \cite{hadoop-bottle}.
@@ -118,7 +95,7 @@ Our central design philosophy was to implement additions to the Chord protocol b
 The design of a distributed file system is closely tied to the design to the implementation of MapReduce \cite{gfs} \cite{hdfs}.  Our system uses CFS \cite{CFS}, short for Cooperative File System, to store files.  Everything in Chord, be it data or a node, is given a hash identifier or key. The ID of a node is the hash of their IP address and port, while the key for a file is the hash of its filename.  In the initial version of Chord, the entire file would be stored in the node with the ID equal or closest upstream to the file's key.
 
 % For more space, add how the author found improvements depending on teh block size
-Dabek et. al found that by splitting the file into blocks and storing each block in a different node greatly improved the system's load balancing when compared to storing the entire file on a single node\cite{CFS}. ChordReduce implements the same system.  Files are split into approximately equally sized blocks.  Each block is treated as an individual file and is assigned a key equal to the hash of it's contents.  The block is then stored at the node responsible for that key.  
+Dabek et. al found that by splitting the file into blocks and storing each block in a different node greatly improved the system's load balancing when compared to storing the entire file on a single node\cite{CFS}. ChordReduce implements the same system.  Files are split into approximately equally sized blocks.  Each block is treated as an individual file and is assigned a key equal to the hash of its contents.  The block is then stored at the node responsible for that key.  
 
 The node which would normally be responsible for the whole file instead stores a \textit{keyfile}.  The keyfile is an ordered list of the keys corresponding to the files' block and is created as the blocks are assigned their respective keys.  When the user wants to retrieve a file, they first obtain the keyfile and then request each block specified in the keyfile.
 
@@ -131,7 +108,7 @@ In ChordReduce's implementation of MapReduce, each node takes on responsibilitie
 
 The job of the stager divide the work into \emph{data atoms}, which define the smallest individual units that work can be done on. This might represent block of text, the result of a summation for a particular intermediate value, or a subset of items to be sorted. The specifics of how to divide the work are defined by the user in a \emph{stage} function.  The data atoms also contain the Map and Reduce functions defined by the user.
 
-If the user wants to perform a MapReduce job over data on the network, the stager locates the keyfile for the data and creates a data atom for each block in the file.  Each data atom is then sent to the node responsible for their corresponding block.  When the data atom reaches it's destination node, that node retrieves the necessary data and applies the Map function.  The results are stored in a new data atom,  which are then sent back to the stager's hash address (or some other user defined address).  This will take $\log_{2} n$ hops traveling over Chord's fingers.  At each hop, the node waits a predetermined minimal amount of time to accumulate additional results (In our experiments, this was 100 milliseconds).  Nodes that receive at least two results merge them using the Reduce function.  The results are continually merged until only one remains at the hash address of the stager. 
+If the user wants to perform a MapReduce job over data on the network, the stager locates the keyfile for the data and creates a data atom for each block in the file.  Each data atom is then sent to the node responsible for their corresponding block.  When the data atom reaches its destination node, that node retrieves the necessary data and applies the Map function.  The results are stored in a new data atom,  which are then sent back to the stager's hash address (or some other user defined address).  This will take $\log_{2} n$ hops traveling over Chord's fingers.  At each hop, the node waits a predetermined minimal amount of time to accumulate additional results (In our experiments, this was 100 milliseconds).  Nodes that receive at least two results merge them using the Reduce function.  The results are continually merged until only one remains at the hash address of the stager. 
 
 
 MapReduce jobs don't rely on a file stored on the network, such as a Monte-Carlo approximation, create data atoms specified by the user stage function in the stage function.  The data atoms are then each given a random hash and sent to the node responsible for that hash address, guaranteeing they are evenly distributed throughout the network. From there, the execution is identical to the above scenario.
@@ -223,14 +200,14 @@ To perform a word frequency count, the stager obtains the keyfile for the desire
 
 
 \begin{figure}
-    \includegraphics[width=\linewidth]{expTime}
+    \includegraphics[width=0.5\linewidth]{expTime}
     \caption{For a sufficiently large job, it was almost always preferable to distribute it.  When the job is too small, such as with the $10^{7}$ data set, our runtime is dominated by the overhead.  Our results are what we would expect when overhead grows logarithmically to the number of workers.}
     \label{expTime}
 \end{figure}
 
 
 \begin{figure}
-    \includegraphics[width=\linewidth]{expSpeed}
+    \includegraphics[width=.5\linewidth]{expSpeed}
     \caption{The larger the size of the job, the greater the gains of distributing with ChordReduce.  In addition, the larger the job, the more workers can be added before we start seeing diminishing returns.  This demonstrates that ChordReduce is scalable.}
     \label{expSpeed}
 \end{figure}
@@ -269,7 +246,7 @@ Since we have now established that $T_{n} = \frac{T_{1}}{n} + k \cdot \log_{2}(n
         0.00250\% & 331.80  &  1.24 \\ \hline 
         0\% & 441.57 & 1.00 \\ \hline
     \end{tabular}
-    \caption{} 
+    \caption[Runtime and Speedup versus Churn Rate]{Runtime and Speedup versus Churn Rate} 
     \label{churnSpeed}
 \end{table}
 
@@ -334,8 +311,6 @@ We presented ChordReduce, a framework for MapReduce that is completely decentral
 
 Using Chord as the middleware for ChordReduce establishes its effectiveness for distributed and concurrent computation.
 The effectiveness of Chord opens up new approaches for tackling other distributed problems, such as supporting databases and machine learning for Big Data, and exascale computations. We intend to further optimize the performance of ChordReduce and extend the middleware to other applications.
-
-\textit{Here are examples of future work that we plan on doing with ChordReduce.  We could do X, which is cool because duh.  Y is another application of this, possibly a consequence of X.}
 
 %For example, future work could incorporate processes that allow Chord to effectively share and distribute mutable files \cite{IRM} and alter them to perform distributed analysis of mutable data.  These same adjustments can be used to improve the latency of the Chord network with mutable data, which was a major reason why a Chord-based distributed DNS \cite{cox2002serving} was abandoned.  
 

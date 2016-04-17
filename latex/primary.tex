@@ -9,7 +9,7 @@
 \usepackage{tabularx}
 %\usepackage{algorithmic}
 \usepackage{algorithm,algpseudocode}
-
+\usepackage{csquotes}
 \usepackage{subcaption}
 \usepackage[font=small]{caption}
 \usepackage{url}
@@ -20,7 +20,7 @@
 \usepackage[hidelinks]{hyperref}
 
 \usepackage{sectsty}
-\allsectionsfont{\normalsize\bfseries}
+\allsectionsfont{\normalsize\textbf\bfseries}
 
 
 
@@ -136,17 +136,29 @@ Previous research has explored utilizing a hyperbolic metric space to provide ef
 	
 	
 	\chapter*{Dedication}
-	Dedicated to the people who I owe my success, to be enumerated in the future.
+	This work is dedicated to those in my who supported me in pursuing my education out of a desire to see me grow: my patient and encouraging spouse, Erin Gillman, and my parents, Bill and Denise Benshoof, who have been active sponsors of my education for my entire life.
 	
 	
 	\chapter*{Acknowledgements}	
-	A lot of people helped me do all of this. I should stop pretending I did it all for a second and mention them.
+
+\begin{itemize}
+\item	Dr. Michael Weeks, who introduced me to the possibility of graduate school, teaching, and research.
+\item	Dr. Valerie Miller, who encouraged my curiosity and has always pushed me to do more. 
+\item	Dr. Raj Sunderraman, who encouraged me to attend Georgia State and helped my find my role here.
+\item	Dr. Anu Bourgeois, who fostered my interest in networking and distributed systems.
+\item	Dr. Robert Harrison, who has been my teacher, sponsor and mentor.
+\item   Andrew Rosen, who has been my serial co-author and good friend.
+\end{itemize}
+	
+
 	
 	\setcounter{tocdepth}{0}
 	\tableofcontents
 	\cleardoublepage
 	\pagenumbering{roman}
 
+
+	\setcounter{tocdepth}{1}
 	\listoftables
 	\addcontentsline{toc}{chapter}{List of Tables}
 	\listoffigures

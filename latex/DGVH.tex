@@ -106,8 +106,7 @@ The rationale for this heuristic is that, in the majority of cases, the midpoint
     \State Sort $candidates$ in ascending order by each node's distance to $n$
     \State Remove the first member of $candidates$ and add it to $short\_peers$
     \For{$c$ in $candidates$}
-    	\State $m$ is the midpoint between $n$ and $c$
-        \If{Any node in $short\_peers$ is closer to $m$ than $n$}
+        \If{Any node in $short\_peers$ is closer to $c$ than $n$}
         	\State Reject $c$ as a peer
         \Else
         	\State Remove $c$ from $candidates$
@@ -276,7 +275,7 @@ We focus our discussion on the two extremes of applications: DHTs, which work wi
 
 
 
-\subsection{Distributed Hash Tables}
+\subsection{Distributed Hash Tables and Voronoi tessellation}
 Arguably all Distributed Hash Tables (DHTs) are built on the concept of Voronoi tessellation.
 In all DHTs, a node is responsible for all points in the overlay to which it is the ``closest'' node.
 Nodes are assigned a key as their location in some keyspace, based on the hash of certain attributes.
@@ -367,7 +366,7 @@ Our results are summarized in Figure \ref{exp_0}.
 
 \begin{figure}
 	\centering
-	\includegraphics[width=1.1\linewidth]{error_rate}
+	\includegraphics[width=0.75\linewidth]{error_rate}
 	\caption{As the size of the graph increases, we see approximately 1 error per node.}
 	\label{exp_0}
 \end{figure}
@@ -456,35 +455,36 @@ As the network size and number of dimensions each increase, convergence slows, b
 		Each point shows the fraction of 2000 lookups that successfully found the correct destination.}
 	
 \end{figure*}
-%\begin{table}
-%\centering
-%\begin{tabular}{|r|r|r|r|}
-%\hline
-%Network Size & Dimensions & avg degree & max degree\\ \hline
-%500   & 2 & 7.004 & 8 \\ \hline
-%1000  & 2 & 7.001 & 8 \\ \hline
-%2000  & 2 & 7.0015 & 8 \\ \hline
-%5000  & 2 & 7.0364 & 66 \\ \hline
-%10000 & 2 & 8.0151 & 81\\ \hline  % the heck?
-%500   & 3 & 10.364 & 16 \\ \hline
-%1000  & 3 & 10.321 & 15 \\ \hline
-%2000  & 3 & 10.272 & 16 \\ \hline
-%5000  & 3 & 10.3264 & 18 \\ \hline
-%10000 & 3 & 9.1233 & 19 \\ \hline
-%500   & 4 & x & x \\ \hline
-%1000  & 4 & x & x \\ \hline
-%2000  & 4 & x & x \\ \hline
-%5000  & 4 & x & x \\ \hline
-%10000 & 4 & x & x \\ \hline
-%500   & 5 & x & x \\ \hline
-%1000  & 5 & x & x \\ \hline
-%2000  & 5 & x & x \\ \hline
-%5000  & 5 & x & x \\ \hline
-%10000 & 5 & x & x \\ \hline
-%\end{tabular}
-%\caption{Information about the size short peer lists, denoted degree here, at the last cycle of the convergence simulation.  For each pair of network size and dimension, we report the average degree in the network, as well as the largest.}
-%\label{tab:convtable}
-%\end{table}
+
+\begin{table}
+\centering
+\begin{tabular}{|r|r|r|r|}
+\hline
+Network Size & Dimensions & avg degree & max degree\\ \hline
+500   & 2 & 7.004 & 8 \\ \hline
+1000  & 2 & 7.001 & 8 \\ \hline
+2000  & 2 & 7.0015 & 8 \\ \hline
+5000  & 2 & 7.0364 & 66 \\ \hline
+10000 & 2 & 8.0151 & 81\\ \hline  % the heck?
+500   & 3 & 10.364 & 16 \\ \hline
+1000  & 3 & 10.321 & 15 \\ \hline
+2000  & 3 & 10.272 & 16 \\ \hline
+5000  & 3 & 10.3264 & 18 \\ \hline
+10000 & 3 & 9.1233 & 19 \\ \hline
+500   & 4 & x & x \\ \hline
+1000  & 4 & x & x \\ \hline
+2000  & 4 & x & x \\ \hline
+5000  & 4 & x & x \\ \hline
+10000 & 4 & x & x \\ \hline
+500   & 5 & x & x \\ \hline
+1000  & 5 & x & x \\ \hline
+2000  & 5 & x & x \\ \hline
+5000  & 5 & x & x \\ \hline
+10000 & 5 & x & x \\ \hline
+\end{tabular}
+\caption{Information about the size short peer lists, denoted degree here, at the last cycle of the convergence simulation.  For each pair of network size and dimension, we report the average degree in the network, as well as the largest.}
+\label{tab:convtable}
+\end{table}
 
 
 \section{Related Work}

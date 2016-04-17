@@ -32,6 +32,8 @@ Increasing the response time and efficiency of DHTs will provide these systems a
 
 \section{Background}
 
+The ideas applied in this paper pull from a variety of backgrounds, including wireless networking, graph embedding and hyperbolic geometry.
+
 \subsection{Geographic Routing}
 
 Geographic routing is used in CDN latency optimization and Wireless Sensor Networks\cite{karp2000geographic}.
@@ -40,7 +42,7 @@ While the ideal is that messages could be routed greedily, the realities of radi
 
 There are serious concerns with application of simple geographic routing in practice.
 Geographic locations may not accurately represent network connectivity and latency.
-Often holes" or "lakes" in the network prevent greedy routing, requiring more complex and stateful routing methods to act as axuillary to greedy routing.
+Often holes" or "lakes" in the network prevent greedy routing, requiring more complex and stateful routing methods to act as auxiliary to greedy routing.
 The fundamental problem being that due to the inability to make connection past an obstacle 
 
 While we will take inspiration from the mechanisms of greedy geographic routing, distributed hash tables are not vulnerable to the problem of untraversable terrain that plagues wireless sensor networks. 
@@ -60,60 +62,21 @@ DGVH\cite{dgvh} is a technique for building minimal greedy traversable meshes in
 
 algorithm for peer selection:
 \begin{enumerate}
-\item Given a $center$ node we are finding the Peer List for
-\item Initialize a empty $Peers$ list
-\item Consider the list $Candidates$ of candidate peers sorted by increasing distance from $center$
-\item Pop the closest member of $Candidates$ and add it to the $Peers$ list. $center$ will always peer with the closest node to it.
-\item For the remaining nodes $c$ in $Candiates$
-\begin{enumerate}
-	\item if $c$ is closer to $center$ than any current members of $Peers$ then add it to the $Peers$ list
-    \item else discard $c$
+	\item Given a $center$ node we are finding the Peer List for
+	\item Initialize a empty $Peers$ list
+	\item Consider the list $Candidates$ of candidate peers sorted by increasing distance from $center$
+	\item Pop the closest member of $Candidates$ and add it to the $Peers$ list. $center$ will always peer with the closest node to it.
+	\item For the remaining nodes $c$ in $Candiates$
+	\begin{enumerate}
+		\item if $c$ is closer to $center$ than any current members of $Peers$ then add it to the $Peers$ list
+		\item else discard $c$
+	\end{enumerate}
 \end{enumerate}
-\end{enumerate}
 
 
-\subsection{Distributed Hash Tables}
 
-Distributed Hash Tables are a scalable system for decentralized key-value storage.
-DHTs use a mapping from the key to a location in the network using a cryptographic hash and a coordinate space.
-Nodes each maintain a peer list of limited size, and maintain a topology that can be greedily searched for any record.
 
-The coordinate spaces and their metrics vary wildly between implementations of DHTs.
 
-Importantly, DHTs are an overlay network, so we work under the assumption that an underlying routing system will allow any node to connect to any other node.
-This eliminates the issue of "holes" or "lakes" that was found in traditional geographic routing.
-Attempting to minimize latency in a DHT mean attempting to leverage the latency minimization work already done by the underlay network more efficiently.
-
-An important refinement we present on the discussion of DHTs is the observation that all of them work under the same basic principle. 
-Nodes are responsible for their Voronoi region in the given metric space and they must maintain peer links with the corresponding Delaunay in order to ensure there is consensus on who owns what records.
-In addition DHTs form "long" connections across the metric space in addition to their Delaunay peers to ensure that the resulting network has Kleinberg "small world"\cite{kleinberg2000navigation} properties.
-
-\subsection{Kademlia}
-
-Kademlia\cite{kademlia} is the most popular DHT methodology based on a "buckets" based peer list approximation and using the XOR metric distance. 
-It powers the tracker-less bittorent mainline DHT, and the C implementation related to that project is likely the greatest cause of it's popularity.
-many other distributed systems utilize modified versions of Kademlia as a means of peer management and as a key-value store.
-
-Kademlia is built in a non-eucldian metric space. 
-Locations are represented by a large integer (160 bit is most common) and the distance between locations is calculated by the XOR metric.
-This means Kademlia's metric space is a generalization of a binary tree, where the locations are mapped to leaf nodes and distance between nodes is the distance required to traverse between them on that tree.
-
-Because of the geometric awkwardness of it's metric, Kademlia uses a modified k-nearest neighbors approach to approximate node's Voronoi regions and Delaunay peers.
-If nodes are evenly distributed through the space, Kademlia's metric provides an $O(log(n))$ diameter network.
-
-\subsection{Chord}
-
-Chord\cite{chord} is exemplar of a family of ring-based DHT's.
-Locations are represented by a large integer similar to Kademlia.
-The metric is a unidirectional (bidirectional in some variants) modulus ring.
-
-Chord tracks the immediate peers in either direction on this ring to maintain the networks and calculating Delaunay triangulation and Voronoi regions in this metric is trivial.
-
-This metric alone would give chord's topology an $O(n)$ diameter 
-and to mitigate this, each node maintains $O(log(n))$ ``fingers''
- distributed in such a way that the diameter of the network is reduced to $O(log(n))$.
- 
- 
 \subsection{Scale Free Networks}
 
 Scale free networks are a family of tree-like networks defined by an having expoential  degree distribution, and a tendency for high-degree nodes to be linked to other high degree nodes.
@@ -145,24 +108,38 @@ By convention we only consider points on the negative z sheet (all calculations 
 
 The hyperbolic plane has many differing qualities from the euclidean plane, most importantly is that of "relativity".
 On a euclidean plane, we can treat any point as the "origin" and calculate new locations for every point or figure on that plane by translation, and have all inter-point angles and distances remain the same.
-The euclidean distance equation $\sqrt{(x_{1}-x_{0})^{2})+(y_{1}-y_{0})^{2})}$ can be interpeted as translating $(x_{1},y_{1})$ into the reference frame where $(x_{1},y_{1})$ is the center, and using the distance metric $\sqrt{x^{2}+y^{2}}$ to determine the distance.
+The euclidean distance equation $\sqrt{(x_{1}-x_{0})^{2})+(y_{1}-y_{0})^{2})}$ can be interpreted as translating $(x_{1},y_{1})$ into the reference frame where $(x_{1},y_{1})$ is the center, and using the distance metric $\sqrt{x^{2}+y^{2}}$ to determine the distance.
 Unlike this, the hyperbolic plane has a defined center, and while points can be rotated and mirrored freely over this center without changing inter-point distance and angle, they cannot be translated.
 The distance between two points in the hyperboloid model is $\operatorname{arcosh}(z_{0}z_{1} - x_{0}x_{1} - y_{0}y_{1})$ where $\operatorname{arcosh}x$ is defined as $\ln{(x+\sqrt{x^{2}+1})}$
 
-Unlike euclidian space, a 2d Hyperbolic Plane has a Greedy Embedding for any graph.
+Unlike euclidean space, a 2d Hyperbolic Plane has a Greedy Embedding for any graph.
 Kleinberg presents his technique for building arbitrary graph embedding in hyperbolic spaces by building a spanning tree of the graph, then embedding the tree into the hyperbolic space.
-This is effective because the circumference of the disk increases expoentially with radius, therefore we can trivially embed trees into the space as the availible space on the disk increases in corospondance with the number of leaves in a full tree.
-While greedily traversable, the resulting embedding does not provide desireable qualities in that greedy routes are not nessiasily the shortest and central nodes recive high levels on congestion.
+This is effective because the circumference of the disk increases exponentially with radius, therefore we can trivially embed trees into the space as the available space on the disk increases in correspondence with the number of leaves in a full tree.
+While greedily traversable, the resulting embedding does not provide desirable qualities in that greedy routes are not necessarily the shortest and central nodes receive high levels on congestion.
 
 
 
 \subsection{Greedy Hyperbolic Embedding}
-Further work by Papadopoulos et al\cite{papadopoulos2010greedy} shows an greedy centralized technique for managing the embedding a dynamic network in a hyperbolic space.
-Papadopoulos presents improvments over Kleinberg's inital work by presenting a simple stratagy for handling node joining the network (greedy insertion) to minimize path latency and routing methods to handle node and edge failure.
+Further work by Papadopoulos et al\cite{papadopoulos2010greedy} shows an greedy centralized technique for managing the creation of a dynamic network in a hyperbolic space.
+Papadopoulos presents improvements over Kleinberg's initial work by presenting a simple stratagy for handling node joining the network (greedy insertion) to minimize path latency and routing methods to handle node and edge failure.
 
-\subsubsection{Online Greedy Embedding}
 
-\subsubsection{Gravity Pressure Routing}
+
+\subsubsection{Growing Network with Greedy Embedding}
+
+Papadopoulos et al provide a sophisticated method for accurate generating a growing scale free network in a hyperbolic space. It is important to note that they are creating a new topology and network from scratch, rather than attempting to use existing latency information to build a Greedy Embedding that also represent that network topology.
+
+Papadopoulos et al show that graphs with similar properties to those found in the "nature" of real world network topologies can be generated and have desirable greedy routing properties.
+This is accomplished by randomly selecting points in the hyperbolic space such that, all points are constrained within a given disk that represents the network radius and a distribution of radius that represents the branching factor of the scale free graph intended to be simulated.
+
+Points are then connected together randomly, using a model weighted by inter-node distance and angle.
+
+\subsubsection{Utility in building a Hyperbolic DHT}
+
+While interesting, the statistical method of peer selection proposed is insufficent for ensuring a Greedy Embedding that can be navigated under churn. The proposed Gravity-Pressure routing method requires packets maintain an nonviable amount of state information without reasonable benefit.
+It begins to follow the path of geographic routing techniques with growing sophistication in response to an environment that is not greedy routable.
+We are better served by ensuring the environment it greedy routable than attempting to add overhead to routing to manage failures of topology maintenance.
+
 
 
 
@@ -171,9 +148,17 @@ Papadopoulos presents improvments over Kleinberg's inital work by presenting a s
 
 We present a technique for building a Distributed Hash Table on a hyperbolic metric space to minimize  look-up and maintenance latency within the constrains of ensuring the scalability of the system.
 We show a simple greedy method for inserting nodes into the network such that latency is congruent 
- with the distance metric.
- We show that unlike previous works indicate, no special updating of node location is required in response to the joining or exiting of new nodes and in fact a constant churn rate will help the system respond to changes in global latency distribution.
+with the distance metric.
+We show that unlike previous works indicate, no special updating of node location is required in response to the joining or exiting of new nodes and in fact a constant churn rate will help the system respond to changes in global latency distribution.
 We have found that if we augment the network topology with a greedy navigable mesh, holes introduced via node loss are accurately repaired and new nodes are greedily inserted at latency ideal locations in the network.
+
+\subsection{The Value of Approximation}
+Unlike previous work, in presenting a practical DHT description, we are dealign with different premises than previous work with hyperbolic embedding.
+The largest divergence from Kleinberg and Papadopoulos works is that rather than dealing with embedding a scale free graph, we are embedding a effectivly random sampling of a massive scale free graph in the form of the internet.
+Secondly, we will be dealing with constant churn of members of the network, and changes in inter-node latnecy over time.
+The consequence of this is that the exact methods proposed in previous work, which promise essentially optimial routes cannot be extended into reality in that fashion.
+Because we are dealing with a sampling of a scale free graph, rather than the entire graph, we will induce stetch simply because we cannot connect all nodes in the overlay network as a clique. 
+We are bound to the scalaibility limitations of a distributed hash table.
 
 
 \subsection{Hyperbolic DHT Model}
@@ -195,12 +180,12 @@ Given that the goal of the embedding is that paths can be routed with minimal la
 Given any arbitrary node in the network as a start point, the joining has two sequential greedy searches:
 
 First the joining node greedily searches for the location <0,0,-1> which represents the "center" of the network.
-Once we have a reference to a node at the center of the network the preform a greedy best first search similar to before, but rather than looking up the next hop, we query a node for it's peers. We then ping each peer to test latency. We select the peer with lowest latency and iterate this process until we have found a node to which we have lower latency than all of it's peers. We select a location subordinate to this node and preform a traditional UrDHT join at this location.
+Once we have a reference to a node at the center of the network the preform a greedy best first search similar to before, but rather than looking up the next hop, we query a node for its peers. We then ping each peer to test latency. We select the peer with lowest latency and iterate this process until we have found a node to which we have lower latency than all of its peers. We select a location subordinate to this node and preform a traditional UrDHT join at this location.
 
 
 \begin{enumerate}
-\item build a greedy navigable mesh over points in the hyperbolic embedding to augment routing and ensure delivery using greedy forwarding under churn
-\item describe a greedy algorithm for joining nodes to discover ideal insertion points starting from any node in the network
+	\item build a greedy navigable mesh over points in the hyperbolic embedding to augment routing and ensure delivery using greedy forwarding under churn
+	\item describe a greedy algorithm for joining nodes to discover ideal insertion points starting from any node in the network
 \end{enumerate}
 
 \subsection{Routing and Message Passing in the Hyperbolic DHT}
@@ -214,7 +199,7 @@ Often a message will originate from a user who is not even a member of the DHT q
 
 A message will begin in the network at a selected "sponsor", who hopefully is chosen for low latency with the user, but this is not required and a sponsor can simply be any known member of the DHT.
 The message is passed between members of the DHT using a greedy "best first" strategy, that forwards the message to the peer closest to the destination location (in this case using the distance along the geodesic).
-No trace-back or hop count information is required to ensure delivery, and a node will consider itself the destination of the message when it is closer to the destination location than any of it's peers.
+No trace-back or hop count information is required to ensure delivery, and a node will consider itself the destination of the message when it is closer to the destination location than any of its peers.
 Once the query message is handled (often storing or retrieving a value), the response (a success notification or the requested data) will be sent directly to the user rather than using the overlay network.
 
 
@@ -231,9 +216,9 @@ Given a centered and bounded disk on the hyperbolic plane in which all nodes fal
 
 Using the following algorithm to produce points will evenly distribute the random points over the disk up to MAXRADIUS. A maximum radius is required because a higher share of points will be distributed to locations distant from the origin of the space as the circumference of the space increases exponentially in response to radius. While it would be possible to distribute points over an unbounded space statistically, in this case the majority of points would be assigned to portions of the hyperbolic disk increasingly distant from the embedding of the DHT nodes.  
 \begin{enumerate}
-\item SEED(HASH(key))
-\item ANGLE = $2\pi{} \dot{} \mathit{RANDOM()}$
-\item RADIUS = $\mathit{MAXRADIUS} + \frac{\log{(1-{\mathit{RANDOM()}})}}{\mathit{MAXRADIUS}}$
+	\item SEED(HASH(key))
+	\item ANGLE = $2\pi{} \dot{} \mathit{RANDOM()}$
+	\item RADIUS = $\mathit{MAXRADIUS} + \frac{\log{(1-{\mathit{RANDOM()}})}}{\mathit{MAXRADIUS}}$
 \end{enumerate}
 
 
@@ -262,6 +247,11 @@ Even if the accuracy of the hyperbolic embedding fails due to unforeseen technic
 The stretch ratio observed in existing DHTs is the number of hops required to complete a lookup.
 In practice, the distance between any successive hops in the lookup is expected to be the average inter-node distance, thus the expected stretch is $O(\log{n})$ times the average inter-node distance. 
 
+\begin{figure}[H]
+	\includegraphics[width=\textwidth]{churn_stretch}
+	\caption{Here we see the stretch factor (essentially embedding quality) over time as nodes exit and join the network. Removal of central nodes can often require a short period of re-ajdustment, but stretch maintains stablility over time}
+\end{figure}
+
 
 \subsection{Congestion and Route Diversity}
 Problematically, the maintenance latency and lookup latency provided by hyperbolic embedding have an inherent disadvantage noted by previous authorities on the topic\cite{kleinberg2007geographic}. 
@@ -276,10 +266,30 @@ This also points out that for future work, in general, reducing the diameter of 
 
 Additional congestion avoidance behavior is trivial to implement because the DGVH mesh greedy routing can effectively route around holes, when a node is reaching congestion saturation, it can begin to respond to routing queries with a failure message, causing the forwarding algorithm to bypass the overloaded node, if the overloaded node is the only viable path to the destination, then the resulting loop the packets follow will act as an ad-hoc buffer, storing and re-trying sending messages to congested peers until they can be accepted, effectively using the network as a memory in much the same sense as a mercury delay line\cite{auerbach1949mercury}.
 
+\begin{figure}
+	\includegraphics[width=0.5\textwidth]{radius_vs_load}
+	\caption{Here we see the congestion when using short peers only (approximaitng a scale free graph) and when utilizing randomly selected long peers.
+		Using only short peers shows that central nodes handle disproportionate amounts of messages.
+	}
+\end{figure}
+
+\begin{figure}
+	\includegraphics[width=0.5\textwidth]{congestion_4}
+	\caption{Using only short peers forces more nodes, to take on higher congestion versus using long peers which globally reduces congestion.
+	}
+\end{figure}
 
 \subsection{Simulation}
 
 We simulate the greedy construction of a hyperbolic embedding and show that they produce very low latency stretch
+
+\begin{figure}
+	\includegraphics[width=0.5\textwidth]{disk}
+	\caption{
+		This is an example of the short-peer topology of a network embedded into hyperbolic space viewed through the Poincaré Disk model.
+	}
+\end{figure}
+
 
 We simulate churn in a dynamic embedding and show that the embedding retains low latency stretch over time. We generate a 1000 node scale free graph and a size 100 overlay DHT. For 10,000 iterations we randomly select a node from the overlay and remove it, and then randomly select a node from the 1000 node underlay network and greedily insert it into the network using the join method discussed above then record and log the average route stretch.
 
@@ -289,12 +299,17 @@ Showing that greedy insertion is effective and maintaining the embedding under c
 
 
 \section{Conclusions}
-we show that a decentralized algorithm for embedding overlay networks is possible and easy.
+We show that a decentralized algorithm for embedding overlay networks is possible by building a greedy traversable mesh to augment a greedy embedding.
+This approach is possible because we work under different assumptions than previous work, as we are attempting to approximately embed a subset of a very large scale free graph rather than a perfect embedding of an entire scale free graph.
+We have shown that stretch over optimal latency is O(1) and that a finite amount of long peers can dramatically reduce network congestion and disproportionate query load in the network.
 
-\begin{figure}[h]
- \includegraphics[width=0.5\textwidth]{congestion_3}
-\end{figure}
+\subsubsection{Concerns and Future Work}
 
-\begin{figure}[h]
- \includegraphics[width=0.5\textwidth]{churn_stretch}
-\end{figure}
+While we consider application of this system to practice a straightforward practice extending previous work in DGVH\cite{dgvh} usage in real systems presents a new issue.
+While previous DHTs could be "optimized" to reduce effort by storing replicas of stored data at points adjacent to the host, because adjacent peers in the hyperbolic overlay are more likely to be physically close to one another, the statistical assurances provided by such robustness mechanism are weaker and such strategies should be re-examined before implementing a system similar to the one proposed in this work.
+
+
+
+
+
+
