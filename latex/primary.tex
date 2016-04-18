@@ -9,7 +9,7 @@
 \usepackage{tabularx}
 %\usepackage{algorithmic}
 \usepackage{algorithm,algpseudocode}
-\usepackage{csquotes}
+\usepackage [autostyle, english = american]{csquotes}
 \usepackage{subcaption}
 \usepackage[font=small]{caption}
 \usepackage{url}
@@ -20,7 +20,7 @@
 \usepackage[hidelinks]{hyperref}
 
 \usepackage{sectsty}
-\allsectionsfont{\normalsize\textbf\bfseries}
+\allsectionsfont{\normalsize\bfseries\raggedright}
 
 
 
@@ -38,6 +38,19 @@
 \title{\textsc{BUILDING ROBUST DISTRIBUTED INFRASTRUCTURE NETWORKS}}
 \author{\textsc{Brendan Lane Benshoof}}
 \date{}
+
+
+
+\usepackage{tocloft}
+
+\renewcommand{\cfttoctitlefont}{\normalsize\bfseries\raggedright}
+\renewcommand{\cftloftitlefont}{\normalsize\bfseries\raggedright}
+\renewcommand{\cftlottitlefont}{\normalsize\bfseries\raggedright}
+
+\renewcommand\cftsecleader{\cftdotfill{\cftdotsep}}
+
+\AtBeginDocument{\renewcommand\contentsname{Table of Contents}}
+
 
 \begin{document}
 	
@@ -137,7 +150,7 @@ Previous research has explored utilizing a hyperbolic metric space to provide ef
 	
 	\chapter*{Dedication}
 	This work is dedicated to those in my who supported me in pursuing my education out of a desire to see me grow: my patient and encouraging spouse, Erin Gillman, and my parents, Bill and Denise Benshoof, who have been active sponsors of my education for my entire life.
-	
+	\pagenumbering{roman}	
 	
 	\chapter*{Acknowledgements}	
 
@@ -150,17 +163,18 @@ Previous research has explored utilizing a hyperbolic metric space to provide ef
 \item   Andrew Rosen, who has been my serial co-author and good friend.
 \end{itemize}
 	
+	\clearpage
 
-	
 	\setcounter{tocdepth}{0}
 	\tableofcontents
-	\cleardoublepage
-	\pagenumbering{roman}
+	\clearpage
+
 
 
 	\setcounter{tocdepth}{1}
 	\listoftables
 	\addcontentsline{toc}{chapter}{List of Tables}
+	\clearpage
 	\listoffigures
 	\addcontentsline{toc}{chapter}{List of Figures}
 	

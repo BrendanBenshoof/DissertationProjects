@@ -234,7 +234,7 @@ We present two independent arguments that the diameter of a greedy traversable g
 
 Given that the diameter of a scale free graph is $O(\frac{\log{n}}{\log{\log{n}}})$\cite{bollobas2004diameter} and the greedy embedding is a super-set of this graph (and being a super-set could only reduce the diameter) the diameter of the embedding is $O(\frac{\log{n}}{\log{\log{n}}})$ or better which falls in $O(\log{n})$
 
-Given that the greedy insertion algorithm attempts to uniformly insert nodes into a bounded hyperbolic plane such that the voronoi regions of these nodes are approximately equal in area.
+Given that the greedy insertion algorithm attempts to uniformly insert nodes into a bounded hyperbolic plane such that the Voronoi regions of these nodes are approximately equal in area.
 Area of the hyperbolic disk is effectively a exponential function of the radius, thus the average shortest path in the network is expected to cross $O(\log{n})$ regions.
 
 \subsection{Expected Path Stretch}
@@ -268,7 +268,7 @@ Additional congestion avoidance behavior is trivial to implement because the DGV
 
 \begin{figure}
 	\includegraphics[width=0.5\textwidth]{radius_vs_load}
-	\caption{Here we see the congestion when using short peers only (approximaitng a scale free graph) and when utilizing randomly selected long peers.
+	\caption{Here we see the congestion when using short peers only (approximating a scale free graph) and when utilizing randomly selected long peers.
 		Using only short peers shows that central nodes handle disproportionate amounts of messages.
 	}
 \end{figure}
