@@ -6,8 +6,8 @@
 
 \chapter{Introduction}
 
-As more and more systems are growing using existing P2P technology, we are building services usable by the public (and exploring even more possibilities) based on a P2P system called a Distributed Hash Table.
-While current Distributed Hash Tables are incredible effective and robust solution to maintain a shared state in a P2P system in a scalable fashion, little to no improvement has been provided over the initial Chord\cite{chord} and Kademlia\cite{kademlia} DHTs.
+As more and more systems are growing using existing Peer to Peer (P2P) technology, we are building services usable by the public (and exploring even more possibilities) based on a P2P system called a Distributed Hash Table(DHT).
+While current DHTs are a incredibly effective and a robust solution to maintain a shared state in a P2P system in a scalable fashion, little to no improvement has been provided over the initial Chord\cite{chord} and Kademlia\cite{kademlia} DHTs.
 This dissertation explores improvements and applications of Distributed Hash Tables to provide the capacity for future robust and distributed systems infrastructures and services.
 
 \section{The Ship of Theseus}
@@ -26,52 +26,37 @@ When considering a Distributed Hash Table, we are intentionally designing a syst
 It is our task to design a pattern of behavior for each of these parts that allows the system to respond to queries despite constant in-progress failure and replacement and to constantly propagate the information stored in the system onward to new storage before the current storage fails. 
 
 Despite the challenge involved in building such a system, barring dramatic change to our expectations of the future, the existing Distributed Hash Tables will be able to persist as a public utility indefinitely.
-I present that the answer to the Paradox of the Ship of Theseus is, "I don't care as long as the ship still floats".
+I present that the answer to the Paradox of the Ship of Theseus is, ``I don't care as long as the ship still floats''.
 
-\section{Goals}
+%\section{Goals}
 
-The goals of the papers making up this dissertation are straightforward.
-Four subjects concerning DHTs are open and meriting improvement, generalization, application, efficiency, and robustness. 
-\begin{itemize}
+%The goals of the papers making up this dissertation are straightforward.
+%Four subjects concerning DHTs are open and meriting improvement, generalization, application, efficiency, and robustness. 
+%\begin{itemize}
 
-\item DGVH and UrDHT present ideas to generalize our model of "What is a Distributed Hash Table" beyond the current proposed methods into a continuum of viable DHT methods which we can explore for ideal properties. 
+%\item DGVH and UrDHT present ideas to generalize our model of ``What is a Distributed Hash Table'' beyond the current proposed methods into a continuum of viable DHT methods which we can explore for ideal properties. 
 
-\item ChordReduce is concerned with application of a DHT to act as an organizing mechanism for a traditional distributed computing paradigm, but with viability at larger scales of operation and duration.
+%\item ChordReduce is concerned with application of a DHT to act as an organizing mechanism for a traditional distributed computing paradigm, but with viability at larger scales of operation and duration.
 
-\item Hyperbolic DHTs utilize the generalized model of distributed hash tables to realize the idea of using a hyperbolic coordinate space to improve DHT efficiency that has existed in theory for about a decade.
+%\item Hyperbolic DHTs utilize the generalized model of distributed hash tables to realize the idea of using a hyperbolic coordinate space to improve DHT efficiency that has existed in theory for about a decade.
 
-\item New replication strategies will allow DHTs to store records with essentially zero loss on any time scale the implementers deem appropriate for their uses. 
-
-
-\end{itemize}
+%\item New replication strategies will allow DHTs to store records with essentially zero loss on any time scale the implementers deem appropriate for their uses. 
 
 
+%\end{itemize}
 
-\chapter{Technical Background}
 \section{What is a DHT?}
 At the core of maintaining a distributed system is establishing a shared state in the form of a table of key-value pairs.
 DHTs provide a mechanism for agreeing upon a very large shared state with tolerable inconsistency (records are sometimes lost, and if mutable they may be inconsistent in value).
 While other techniques of consensus provide higher confidence, DHTs scale to awesome levels of storage capacity because they are highly tolerant of the failure of nodes within themselves.
 In practice, DHTs and similar distributed systems' performance are bound by the CAP Theorem\cite{brewer2010certain}.
 
-\subsection{CAP Theorem/ Brewer’s Theorem}
-CAP Theorem describes a trade-off between three Attributes of distributed systems.
-It states that any distributed system is a compromise between consistency, availability and partition tolerance and that no distributed store of state can posses all of these qualities at a time.
-\begin{itemize}
-\item Consistency: Everybody agrees on the contents of shared data
-\item Availability: Everybody can quickly and consistently access all the data.
-\item Partition Tolerance: The network can handle loss of nodes and connectivity between nodes without loosing the system's cohesion or data.
-\end{itemize}
-
-As partition tolerance is required in a DHT for long term operation, this leaves us a trade-off between Consistency and Availability.
-In DHTs consistency is limited to assure availability of records to users, however such trade-offs are not binary, and we can can seek a balance between availability and consistency to best suit the needs of applications.
-
 
 \section{What are the currently existing DHTs?}
 
 Chord and Kademlia are the most commonly used DHTs in practice. 
 Chord has been favored by researchers because it was designed with a series of proofs to show its consistency in the face of churn.
-Sadly these proofs have been shown to be incorrect\cite{zave2012using} without serious modification to the established protocol.
+These proofs have been shown to be incorrect\cite{zave2012using} without modification to the established protocol.
 
 
 \subsection{Chord}
@@ -82,11 +67,11 @@ Files in the network are distributed evenly among its members.
 As a distributed hash table (DHT), each member of the network and the data stored on the network is mapped to a unique $m$-bit key or ID, corresponding to one of  $2^m$ locations on a ring. 
 The ID of a node and the node itself are referred to interchangeably.
 
-In a traditional Chord network, all messages travel in one direction - upstream, hopping from one node to another with a greater ID until it wraps around.
+In a traditional Chord network, all messages travel in one direction- upstream hopping from one node to another with a greater ID until it wraps around.
 A node in the network is responsible for all the data with keys \textit{above or upstream} his predecessor, up through and including its own ID.  If a node is responsible for some key, it is referred to as being the successor of that key.
 
 Robustness in the network is accomplished by having nodes backup their contents to their $s$ (often 1) immediate successors, the closest nodes upstream.  
-This is done because when a node leaves the network or fails, the most immediate successor would be responsible for the content its content.
+This is done because when a node leaves the network or fails, the most immediate successor would be responsible for its content.
 
 Each node maintains a table of $m$ shortcuts to other peers, called the finger table.   The $i$th entry of a node $n$'s finger table corresponds to the node that is the successor of the key $n+2^{i-1} \mod 2^m $.  
 Nodes route messages to the finger that is closest to the sought key without going past it, until it is received by the responsible node.  This provides Chord with a highly scalable $\log_2(N)$ lookup time for any key\cite{chord}.
@@ -106,11 +91,11 @@ Kademlia is the most popular DHT methodology.
 It powers the trackerless bittorent mainline DHT, and the C implementation related to that project is likely the greatest cause of its popularity.
 Many other distributed systems utilize modified versions of Kademlia as a means of peer management and as a key-value store.
 
-Kademlia is built in a non-Eucldian metric space. 
+Kademlia is built in a non-Euclidian metric space. 
 Locations are represented by a large integer (160 bit is most common) and the distance between locations is calculated by the XOR metric.
 This means Kademlia's metric space is a generalization of a binary tree, where the locations are mapped to leaf nodes and distance between nodes is the distance required to traverse between them on that tree.
 
-Because of the geometric awkwardness of its metric, Kademlia uses a modified k-nearest neighbors approach to approximate node's Voronoi regions and Delaunay peers.
+Because of the geometric awkwardness of its metric, Kademlia uses a modified k-nearest neighbors approach to approximate a node's Voronoi regions and Delaunay peers.
 If nodes are evenly distributed through the space, Kademlia's metric provides an $O(log(n))$ diameter network.
 
 
@@ -118,5 +103,23 @@ If nodes are evenly distributed through the space, Kademlia's metric provides an
 
 DHTs are designed to be used to store data in a distributed system that would normally be centrally stored in other systems, like a database or other records.
 In practice, they also double as a mechanism for peers discovery and network management.
-Many P2P services use a DHT as part of their infrastructure: Bitorrent\cite{jimenez2011kademlia}, CJDNS\cite{hodson2013meshnet}, and I2P\cite{zantout2011i2p}
+Many P2P services use a DHT as part of their infrastructure: Bittorrent \cite{jimenez2011kademlia}, CJDNS \cite{hodson2013meshnet}, and I2P \cite{zantout2011i2p}
 % %Give examples of how DHTs are used in those projects
+
+\section{Roadmap}
+
+This dissertation tracks my exploration though appreciations of and improvements to Distributed Hash Tables.
+
+Chapter 2 describes ChordReduce \cite{chordreduce} which demonstrates the application of a Chord DHT to organizing a large scale distributed computation in the MapReduce \cite{mapreduce} paradigm.
+This exploration lead to considerations of how to generalize the concept of DHTs.
+Where there were 3 distinct DHT mechanisms (Chord \cite{chord}, Kademlia \cite{kademlia}, and CAN \cite{can}) I was interested in exploring a more expansive space of variations in organization strategy.
+
+In search of a tool to allow the generation of a DHT behavior I developed DGVH \cite{DGVH} (described in Chapter 3) which permitted me to easily build a DHT protocol to operate using any system of coordinates and distance function I wished.
+In order to build practical systems for test, we needed a software system that could easily be modified to implement new DHT behaviors.
+UrDHT \cite{urdht} is an open source software project documented in Chapter 4, which allows us to rapidly prototype and test new DHT methods of organization.
+
+Intended for use with UrDHT, Chapters 5 and 6 discuss optimizations of DHT behavior.
+Chapter 6 discusses a mechanism for reactively storing copies of data such that it is highly unlikely data will ever be lost.
+Chapter 7 discusses a method of assigning participants to specific points in a DHT such that the latency between peers and across the network is minimized  
+These UrDHT and these optimizations are intended to pave the path for further exploration of I think was a prematurely abandoned space of research.
+

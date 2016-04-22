@@ -2,34 +2,34 @@
 
 \chapter{A Distributed Greedy Heuristic for Computing Voronoi Tessellations With Applications Towards Peer-to-Peer Networks}
 %\author{Double Blind}
-\begin{center}
-Brendan Benshoof \qquad Andrew Rosen \qquad Anu G. Bourgeois \qquad Robert W. Harrison
+%\begin{center}
+%Brendan Benshoof \qquad Andrew Rosen \qquad Anu G. Bourgeois \qquad Robert W. Harrison
 
 
-Published DPDNS Workshop IPDPS 2015
-\end{center}
+%Published DPDNS Workshop IPDPS 2015
+%\end{center}
 
 
 %  We could use a different config 
 % networks are only hpped
-% we can do non-euclidean metrics if we have a non-euclidean distance and midpoint definition
+% we can do non-Euclidean metrics if we have a non-Euclidean distance and midpoint definition
 
 
 
 
-\section{Introduction}
-\label{sec:intro}
+
+\label{sec:dgvhintro}
 
 Voronoi diagrams \cite{voronoi} have been used in distributed and  peer-to-peer (P2P) applications for some time. 
 They have a wide variety of applications.
-Voronoi diagrams can be used as to manage distributed hash tables \cite{virtvoro}, or for in coverage detection for wireless networks \cite{carbunar2004distributed}.
+Voronoi diagrams can be used as to manage distributed hash tables \cite{virtvoro}, or in coverage detection for wireless networks \cite{carbunar2004distributed}.
 Additionally, Massively Multiplayer Online games (MMOs) can use them to distribute game states and events between players at a large scale \cite{hu2004scalable} \cite{hu2008voronoi} \cite{Backhaus:2007:VAS:1326257.1326266}.
 
-Computing the Voronoi tessellation along with its coprime problem, Delaunay Triangulation, is a well analyzed problem.
+Computing the Voronoi tessellation along with its coprime problem, Delaunay Triangulation, is a well-analyzed problem.
 There are many algorithms to efficiently compute a Voronoi tessellation given all the points on a plane, such as Fortune's sweep line algorithm \cite{fortune1987sweepline}.
 However, many network applications are distributed and many of the algorithms to compute Voronoi tessellations are unsuited to a distributed environment.
 
-In addition, complications occurs when points are located in spaces with more than two dimensions.
+In addition, complications occur when points are located in spaces with more than two dimensions.
 Computing the Voronoi tessellation of $n$ points in a space with $d$ dimensions takes $O(n^{\frac{2d-1}{d}})$ time \cite{watson1981computing}.
 Distributed computations often have to resort to costly Monte-Carlo calculations \cite{raynet} in order to handle more than two dimensions.
 
@@ -42,21 +42,21 @@ Our paper presents the following contributions:
 \begin{itemize}
 	\item We present our Distributed Greedy Voronoi Heuristic (DGVH). 
 	The DGVH is a fast, distributed, and highly accurate method, whereby nodes calculate their individual regions described by a Voronoi tessellation using the positions of nearby nodes.
-	DGVH can work in an arbitrary number of dimensions and can handle non-euclidean distance metrics.
+	DGVH can work in an arbitrary number of dimensions and can handle non-Euclidean distance metrics.
     Our heuristic can also handle toroidal spaces.
-	In addition, DGVH can accommodate the calculation of nodes moving their positions and adjust their region accordingly, while still maintaining a high degree of accuracy (Section \ref{sec:dgvh}).
+	In addition, DGVH can accommodate the calculation of nodes moving their positions and adjust their region accordingly, while still maintaining a high degree of accuracy (Section \ref{sec:dgvhdgvh}).
     Even where small inaccuracies exist, DVGH will create a fully connected graph.
-	\item We discuss how P2P networks and distributed applications can use DGVH (Section \ref{sec:applications}).
+	\item We discuss how P2P networks and distributed applications can use DGVH (Section \ref{sec:dgvhapplications}).
 	In particular, we show how we can use DGVH to build a distributed hash table with embedded minimal latency.
 	\item We present simulations demonstrating DGVH's efficacy in quickly converging to the correct Voronoi tessellation.
     We simulated our heuristic in networks ranging from size 500 nodes to 10000 nodes.
-	Our simulations show that a distributed network running DGVH accurately determines the region a randomly chosen point falls in 90\% of the time within 20 cycles and converges near 100\% accuracy by cycle 30 (Section \ref{sec:experiments}).
-	\item We present the related work we have built upon to create our heuristic and what improvements we made with DGVH (Section \ref{sec:related}).
+	Our simulations show that a distributed network running DGVH accurately determines the region a randomly chosen point falls in 90\% of the time within 20 cycles and converges with near 100\% accuracy by cycle 30 (Section \ref{sec:dgvhexperiments}).
+	\item We present the related work we have built upon to create our heuristic and what improvements we made with DGVH (Section \ref{sec:dgvhrelated}).
 \end{itemize}
 
 
 \section{Distributed Greedy Voronoi Heuristic}
-\label{sec:dgvh}
+\label{sec:dgvhdgvh}
 
 
 A Voronoi tessellation is the partition of a space into cells or regions along a set of objects $O$, such that all the points in a particular region are closer to one object than any other object.  
@@ -66,7 +66,7 @@ In network applications that use Voronoi tessellations, nodes in the network act
 
 The Voronoi tessellation and Delaunay triangulation are dual problems, as an edge between two objects in a Delaunay triangulation exists if and only if those object's Voronoi regions border each other.  
 This means that solving either problem will yield the solution to both.   
-An example Voronoi diagram is shown in Figure \ref{voro-ex}.
+An example of a Voronoi diagram is shown in Figure \ref{voro-ex}.
 For additional information, Aurenhammer \cite{voronoi} provides a formal and extremely thorough description of Voronoi tessellations, as well as their applications.
 
 
@@ -86,7 +86,8 @@ For additional information, Aurenhammer \cite{voronoi} provides a formal and ext
 
 %take for granted that it requires a fast and efficient way to compute Voronoi tessilations in an arbitrary number of dimensions.
 %The Distributed Greedy Voronoi Heuristic (DGVH) is a fast method for nodes to select peers from their Deluanay Triangulation (Algorithm \ref{DGVH}).
-The Distributed Greedy Voronoi Heuristic (DGVH) is a fast method for nodes to define their individual Voronoi region (Algorithm \ref{alg:dgvh}). 
+The Distributed Greedy Voronoi Heuristic (DGVH) is a fast method for nodes a P2P network to define their individual Voronoi region (Figure \ref{alg:dgvh}).
+If each node is assigned a location, DGVH builds an approximation of the nodes it is required to connect to such that it can accurately discern it's Voronoi region.
 This is done by selecting the nearby nodes that would correspond to the points connected to it by a Delaunay triangulation.
 The rationale for this heuristic is that, in the majority of cases, the midpoint between two nodes falls on the common boundary of their Voronoi regions.
 
@@ -157,7 +158,7 @@ Thus, a node defines its Voronoi region by keeping a list of the peers that boun
 This heuristic has the benefit of being fast and scalable into any geometric space where a distance function and midpoint can be defined.
 The distance metric used for this paper is the minimum distance in a multidimensional unit toroidal space.
 Where $\vec{a}$ and $\vec{b}$ are locations in a $d$-dimensional unit toroidal space:
-\[ distance = \sqrt{\sum\limits_{i\in d} (\min(|\vec{a}_i-\vec{b}_i|, 1-|\vec{a}_i-\vec{b}_i|))^2}\]
+\[ distance = \sqrt{\sum\limits_{i\in d} (\min(| a_{i} -b_{i}|, 1-|a_{i}-b_{i}|))^2}\]
 Whether or not distance corresponds to actual physical distance or some virtual distance on an overlay depends on the application.
 
 %In two-dimensional spaces, there is quick hack to achieve 100\% accuracy distributed.
@@ -171,7 +172,7 @@ This is demonstrated in Figure \ref{occ-ex}.
 	\caption{The edge between $A$ and $B$ is not detected by DGVH, as node $C$ is closer to the midpoint than $B$ is.  This is mitigated by peer management polices.}  %Add labels a b c and reference the node labels in text
 	\label{occ-ex}
 \end{figure}
-Our algorithm handles these cases via our method of peer management (Section \ref{sec:manage}).
+Our algorithm handles these cases via our method of peer management (Section \ref{sec:dgvhmanage}).
 %Overaggressive pruning by a single nodes is handled by neighboring nodes. 
 %So long as a single node determines that an edge exists, it will advertise that edge's existence.
 
@@ -181,7 +182,7 @@ Our algorithm handles these cases via our method of peer management (Section \re
 
 
 \subsection{Peer Management}
-\label{sec:manage}
+\label{sec:dgvhmanage}
 Nodes running the heuristic maintain two peer lists: \textit{Short Peers} and \textit{Long Peers}.
 This is done to mitigate the error induced by DGVH and provide robustness against churn\footnote{The disruption caused to an overlay network by the continuous joining, leaving, and failing of nodes.} in a distributed system.
 
@@ -218,7 +219,7 @@ The node combines the lists of short peers\footnote{Nodes remove themselves and 
 The candidates determined not to be short peers become long peers.  
 If the resulting number of long peers exceeds the maximum size of \textit{Long Peers}, a random subset of the maximum size is kept.
 
-The formal algorithm for this process is described in Algorithm~\ref{alg:gossip}.
+The formal algorithm for this process is described in Figure~\ref{alg:gossip}.
 This maintenance through gossip process is very similar to the gossip protocol used in Beaumont et al.'s RayNet \cite{raynet}.
 
 
@@ -259,7 +260,7 @@ In the vast majority of cases, the number of peers is equal to the minimum size 
 This yields $k=(3d+1)^{2}+3d+1$ in the expected case, where the lower bound and expected complexities are $\Omega(1)$.
 
 Previous work \cite{raynet} claims constant time approximation. 
-The reality is that Raynet's leading constant is in the order of thousands. % as Monte-Carlo samples.  
+The reality is that RayNet's leading constant is in the order of thousands. % as Monte-Carlo samples.  
 Our algorithm has a greater asymptotic worst case cost, but for all current realistic network sizes it will be more time efficient then RayNet's approximation.
 
 
@@ -267,16 +268,16 @@ Our algorithm has a greater asymptotic worst case cost, but for all current real
 
 
 \section{Applications}
-\label{sec:applications}
+\label{sec:dgvhapplications}
 
-As we previously discussed in Section \ref{sec:intro}, Voronoi tessellation have many applications for distributed systems \cite{carbunar2004distributed} \cite{hu2004scalable} \cite{hu2008voronoi} \cite{Backhaus:2007:VAS:1326257.1326266}.
+As we previously discussed in Section \ref{sec:dgvhintro}, Voronoi tessellations have many applications for distributed systems \cite{carbunar2004distributed} \cite{hu2004scalable} \cite{hu2008voronoi} \cite{Backhaus:2007:VAS:1326257.1326266}.
 We focus our discussion on the two extremes of applications: DHTs, which work with overlay networks, and wireless networks, which need to take literal physical constraints into account.
 
 
 
 
 \subsection{Distributed Hash Tables and Voronoi tessellation}
-Arguably all Distributed Hash Tables (DHTs) are built on the concept of Voronoi tessellation.
+Arguably all Distributed Hash Tables (DHTs) are built on the concept of a Voronoi tessellation.
 In all DHTs, a node is responsible for all points in the overlay to which it is the ``closest'' node.
 Nodes are assigned a key as their location in some keyspace, based on the hash of certain attributes.
 Normally, this is just the hash of the IP address (and possibly the port) of the node \cite{chord} \cite{kademlia} \cite{can} \cite{pastry}, but other metrics such as geographic location can be used as well \cite{ratnasamy2002ght}.
@@ -349,7 +350,7 @@ Failure to do this would cause a node to incorrectly determines what falls withi
 
 
 \section{Experiments}
-\label{sec:experiments}
+\label{sec:dgvhexperiments}
 
 
 We implemented two sets of experiments for DGVH.
@@ -359,8 +360,8 @@ Our second set of experiments demonstrates that any errors computed by DGVH are 
 \subsection{Experiment 1: Voronoi Accuracy}
 
 To test the accuracy of our heuristic, we have generated the graphs produced DGVH and a Delaunay triangulation generated by the Triangle \cite{shewchuk96b} library.
-We tested in 2-dimensional euclidean space and measured the number of edges in the graph generated by DGVH that differ from the graph generated by a Delaunay Triangulation.
-We tested networks of 100, 500, 1000, 2000, and 5000 nodes and found that the graphs by DGVH differed from the graph generated Delaunay triangulation by approximately 1 edge per node.
+We test in 2-dimensional Euclidean space and measured the number of edges in the graph generated by DGVH that differ from the graph generated by a Delaunay Triangulation.
+We test networks of 100, 500, 1000, 2000, and 5000 nodes and found that the graphs by DGVH differed from the graph generated Delaunay triangulation by approximately 1 edge per node.
 Our results are summarized in Figure \ref{exp_0}.
 
 
@@ -384,8 +385,8 @@ We do this by showing that the rate of successful lookups approaches 1.0.
 We compare these results to RayNet \cite{raynet}, which proposed that a random $k$-connected graph would be a good, challenging starting configuration for demonstrating convergence of a DHT to a stable network topology.
 
 During the first two cycles of the simulation, each node bootstraps its short peer list by appending 10 nodes, selected uniformly at random from the entire network.
-In each cycle, the nodes gossip (Algorithm \ref{alg:gossip}) and run DGVH using the new information.
-We then calculate the hit rate of successful lookups by simulating 2000 lookups from random nodes to random locations, as described in Algorithm \ref{routesim}.
+In each cycle, the nodes gossip (Figure \ref{alg:gossip}) and run DGVH using the new information.
+We then calculate the hit rate of successful lookups by simulating 2000 lookups from random nodes to random locations, as described in Figure \ref{routesim}.
 A lookup is successful when the network correctly determines which Voronoi region contains a randomly selected point.
 
 
@@ -417,7 +418,7 @@ Our results are shown in Figures \ref{conv2}, \ref{conv3}, \ref{conv4}, and \ref
 Our graphs show that the created overlay quickly constructs itself from a random configuration and that our hit rate reached 90\% by cycle 20, regardless of dimension.
 Lookups consistently approached a hit rate of 100\% by cycle 30. 
 In comparison, RayNet's routing converged to a perfect hit rate at around cycle 30 to 35 \cite{raynet}.
-As the network size and number of dimensions each increase, convergence slows, but not to a significant degree.
+As the network size and number of dimensions each increase, convergence slows.
 
 \begin{figure*}
 	\label{fig:conv}
@@ -471,16 +472,16 @@ Network Size & Dimensions & avg degree & max degree\\ \hline
 2000  & 3 & 10.272 & 16 \\ \hline
 5000  & 3 & 10.3264 & 18 \\ \hline
 10000 & 3 & 9.1233 & 19 \\ \hline
-500   & 4 & x & x \\ \hline
-1000  & 4 & x & x \\ \hline
-2000  & 4 & x & x \\ \hline
-5000  & 4 & x & x \\ \hline
-10000 & 4 & x & x \\ \hline
-500   & 5 & x & x \\ \hline
-1000  & 5 & x & x \\ \hline
-2000  & 5 & x & x \\ \hline
-5000  & 5 & x & x \\ \hline
-10000 & 5 & x & x \\ \hline
+%500   & 4 & x & x \\ \hline
+%1000  & 4 & x & x \\ \hline
+%2000  & 4 & x & x \\ \hline
+%5000  & 4 & x & x \\ \hline
+%10000 & 4 & x & x \\ \hline
+%500   & 5 & x & x \\ \hline
+%1000  & 5 & x & x \\ \hline
+%2000  & 5 & x & x \\ \hline
+%5000  & 5 & x & x \\ \hline
+%10000 & 5 & x & x \\ \hline
 \end{tabular}
 \caption{Information about the size short peer lists, denoted degree here, at the last cycle of the convergence simulation.  For each pair of network size and dimension, we report the average degree in the network, as well as the largest.}
 \label{tab:convtable}
@@ -488,7 +489,7 @@ Network Size & Dimensions & avg degree & max degree\\ \hline
 
 
 \section{Related Work}
-\label{sec:related}
+\label{sec:dgvhrelated}
 %check table size consistancy 
 While there has been previous work on applying Voronoi regions to DHTs and peer-to-peer (P2P) applications, we have found no prior work on how to perform embedding of an inter-node latency graph.   
 
@@ -516,7 +517,7 @@ RayNet does mention the idea of mapping attributes to each axis, but how this ca
 
 
 \section{Conclusion and Future Work}
-\label{sec:conclusion}
+\label{sec:dgvhconclusion}
 
 
 Voronoi tessellations have a wide potential for applications in ad-hoc networks, massively multiplayer games, P2P, and distributed networks. 

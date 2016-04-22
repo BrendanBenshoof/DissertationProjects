@@ -1,14 +1,13 @@
 
 \chapter{MapReduce on a Chord Distributed Hash Table}
 
-\begin{center}
-Andrew Rosen \qquad Brendan Benshoof  \qquad Robert W. Harrison \qquad Anu G. Bourgeois
+%\begin{center}
+%Andrew Rosen \qquad Brendan Benshoof  \qquad Robert W. Harrison \qquad Anu G. Bourgeois
 
-Published ICA Conference 2014
-\end{center}
+%Published ICA Conference 2014 
+%\end{center}
 
 
-\section{Introduction}
 
 %\textit{The story we want to tell is that map reduce is awesome.  Here is alist of pros for ma reduce. Awesome but designed for data center use, which is a subset of the possible configuration but really the only one explored in depth. Introduce single point of failure and if we want to explore using mapreduce in  a more generalized manner we have to solve the problem of a single point of failure.  P2P frameworks are explicitly designed to eliminate single points of failure, scale, wax platonic on virtues of P2P. We were motivated to look at it from a more abstract point of view and ask how can we do map reduce jobs over a more generalized/distributed configuration.  THis paper presents ChordReduce}
 
@@ -24,14 +23,14 @@ These MapReduce platforms are highly centralized and tend to have single points 
 
 
 % http://wiki.apache.org/hadoop/Virtual%20Hadoop  <---- look here for motivation.
-We were motivated to start exploring a more abstract deployment for MapReduce, one that could be deployed in a much wider variety of contexts, from peer-2-peer frameworks to datacenters.  Our framework cannot and does not rely on many common assumptions, such as a dedicated and static network of homogeneous machines. Nor do we assume that failed nodes will recover \cite{hadoopAssumptions}.  Finally, our framework needed to be easy to deploy and simple to use.    
+We were motivated to start exploring a more abstract deployment for MapReduce, one that could be deployed in a much wider variety of contexts, from peer-to-peer frameworks to datacenters.  Our framework cannot and does not rely on many common assumptions, such as a dedicated and static network of homogeneous machines. Nor do we assume that failed nodes will recover \cite{hadoopAssumptions}.  Finally, our framework needed to be easy to deploy and simple to use.    
 
-We used Chord\cite{chord}, a peer-2-peer distributed hash table, as the backbone for developing our system.  Our paper presents these contributions:
+We used Chord\cite{chord}, a peer-to-peer distributed hash table, as the backbone for developing our system.  Our paper presents these contributions:
 \begin{itemize}
-	\item We define the architecture and components of ChordReduce and demonstrate how they fit together to perform MapReduce jobs over a distributed system without the need of a central scheduler or coordinator, avoiding a central point of failure. We also demonstrate how to create programs to solve MapReduce problems using ChordReduce (Section III). 
-	\item We built a prototype system implementing ChordReduce and deployed it on Amazon's Elastic Cloud Compute.  We tested our deployment by solving Monte-Carlo computations and word frequency counts on our network (Section IV).
-	\item We prove that ChordReduce is scalable and highly fault tolerant, even under high levels of churn and can even benefit from churn under certain circumstances. Specifically, we show it is robust enough to reassign work during runtime in response to nodes entering and leaving the network (Section V).
-	\item We contrast ChordReduce with similar architectures and identify future areas of fruitful research using ChordReduce (Sections  VI and VII). 
+	\item We define the architecture and components of ChordReduce and demonstrate how they fit together to perform MapReduce jobs over a distributed system without the need of a central scheduler or coordinator, avoiding a central point of failure. We also demonstrate how to create programs to solve MapReduce problems using ChordReduce (Section 3.3). 
+	\item We built a prototype system implementing ChordReduce and deployed it on Amazon's Elastic Cloud Compute.  We tested our deployment by solving Monte-Carlo computations and word frequency counts on our network (Section 3.4).
+	\item We prove that ChordReduce is scalable and highly fault tolerant, even under high levels of churn and can even benefit from churn under certain circumstances. Specifically, we show it is robust enough to reassign work during runtime in response to nodes entering and leaving the network (Section 3.5).
+	\item We contrast ChordReduce with similar architectures and identify future areas of fruitful research using ChordReduce (Sections  3.6 and 3.7). 
 
 
 
@@ -92,7 +91,7 @@ Marozzo et al. \cite{marozzo2012p2p} shows that adding additional fault-toleranc
 
 %%%% How are files distributed and found without the use of any metadata
 \subsection{File Storage}
-The design of a distributed file system is closely tied to the design to the accompanying implementation of MapReduce \cite{gfs} \cite{hdfs}.  Our system uses CFS \cite{CFS}, short for Cooperative File System, to store files.  Everything in Chord, be it data or a node, is given a hash identifier or key. The ID of a node is the hash of their IP address and port, while the key for a file is the hash of its filename.  In the initial version of Chord, the entire file would be stored in the node with the ID equal or closest upstream to the file's key.
+The design of a distributed file system is closely tied to the design of the accompanying implementation of MapReduce \cite{gfs} \cite{hdfs}.  Our system uses CFS \cite{CFS}, short for Cooperative File System, to store files.  Everything in Chord, be it data or a node, is given a hash identifier or key. The ID of a node is the hash of their IP address and port, while the key for a file is the hash of its filename.  In the initial version of Chord, the entire file would be stored in the node with the ID equal or closest upstream to the file's key.
 
 % For more space, add how the author found improvements depending on teh block size
 Dabek et. al found that by splitting the file into blocks and storing each block in a different node greatly improved the system's load balancing when compared to storing the entire file on a single node\cite{CFS}. ChordReduce implements the same system.  Files are split into approximately equally sized blocks.  Each block is treated as an individual file and is assigned a key equal to the hash of its contents.  The block is then stored at the node responsible for that key.  
@@ -106,12 +105,12 @@ The node which would normally be responsible for the whole file instead stores a
 \subsection{Decentralized MapReduce and Data Flow} 
 In ChordReduce's implementation of MapReduce, each node takes on responsibilities of both a worker and master, much in the same way that a node in a P2P file-sharing service acts as both a client and a server.  To start a job, the user contacts a node at a specified hash address and provides it with the tasks.  This address can be chosen arbitrarily or be a known node in the ring. The node at this hash address is designated as the \textit{stager}.  
 
-The job of the stager divide the work into \emph{data atoms}, which define the smallest individual units that work can be done on. This might represent a block of text, the result of a summation for a particular intermediate value, or a subset of items to be sorted. The specifics of how to divide the work are defined by the user in a \emph{stage} function.  The data atoms also contain the Map and Reduce functions defined by the user.
+The job of the stager is to divide the work into \emph{data atoms}, which define the smallest individual units that work can be done on. This might represent a block of text, the result of a summation for a particular intermediate value, or a subset of items to be sorted. The specifics of how to divide the work are defined by the user in a \emph{stage} function.  The data atoms also contain the Map and Reduce functions defined by the user.
 
 If the user wants to perform a MapReduce job over data on the network, the stager locates the keyfile for the data and creates a data atom for each block in the file.  Each data atom is then sent to the node responsible for their corresponding block.  When the data atom reaches its destination node, that node retrieves the necessary data and applies the Map function.  The results are stored in a new data atom,  which are then sent back to the stager's hash address (or some other user defined address).  This will take $\log_{2} n$ hops traveling over Chord's fingers.  At each hop, the node waits a predetermined minimal amount of time to accumulate additional results (In our experiments, this was 100 milliseconds.)  Nodes that receive at least two results merge them using the Reduce function.  The results are continually merged until only one remains at the hash address of the stager. 
 
 
-MapReduce jobs don't rely on a file stored on the network, such as a Monte-Carlo approximation, to create data atoms specified by the user stage function in the stage function.  The data atoms are then each given a random hash and sent to the node responsible for that hash address, guaranteeing they are evenly distributed throughout the network. From there, the execution is identical to the above scenario.
+MapReduce jobs don't rely on a file stored on the network, such as a Monte-Carlo approximation, to create data atoms specified by the user in the stage function.  The data atoms are then each given a random hash and sent to the node responsible for that hash address, guaranteeing they are evenly distributed throughout the network. From there, the execution is identical to the above scenario.
 
 
 %Once the data atoms are sent out, the stager's job is done and it behaves like any other node in the network. The staging period is the only time ChordReduce is vulnerable to churn, and only if the stager leaves the ring in the middle of sending out data atoms.  The user would get some results back, but only for the data the stager managed to send out.
@@ -129,14 +128,18 @@ All a developer needs to do is write three functions: the staging function, Map,
 %%%% How is robustness provided
 \subsection{Fault-Tolerance}
 Due to the potentially volatile nature of a peer-to-peer network, ChordReduce has to be able to handle an arbitrary amount of churn.
-When a node fails or leaves Chord, the failed node's successor will become responsible for all of the failed nodes keys.
+When a node fails or leaves Chord, the failed node's successor will become responsible for all of the failed node's keys.
 As a result, each node in the ChordReduce network relies on their successor to act as a backup.  
 
 To prevent data from becoming irretrievable, each node periodically sends backups to its successor.  In order to prevent a cascade of backups of backups, the node only passes along what it considers itself responsible for.  What a node is responsible for changes as nodes enter and leave the network.  If a node's successor leaves, the node sends a backup to his new successor.  If the node fails, the successor is able to take his place almost immediately.  This scheme is used to not only backup files, but the Map and Reduce tasks and data atoms as well.
 
 This procedure prevents any single node failure or sequences of failures from harming the network. Only the failure of multiple neighboring nodes poses a threat to the network's integrity.  Furthermore, since a node's ID in the network does not map to a geographical location, any failure that affects multiple nodes simultaneously will be spread uniformly throughout, rather than hitting successive nodes.  This means if successive nodes do fail simultaneously, they did so independently.
 
-This concept can be extended to provide additional robustness.  Suppose that each node has failure rate $r < 1$ and that the each node backs up their data with $s$ successive nodes downstream. If one of these nodes fail, the next successive node takes its place and the next upstream node becomes another backup. This ensures there will always be $s$ backups. The integrity of the ring would only be jeopardized if $s+1$ successive nodes failed almost simultaneously, before the maintenance cycle would have a chance to correct for the failed nodes.  The chances of such an event would be $r^s$, as each failure would be independent.
+This concept can be extended to provide additional robustness. 
+Suppose that each node has failure rate $r < 1$ and that the each node backs up their data with $s$ successive nodes downstream. 
+If one of these nodes fails, the next successive node takes its place and the next upstream node becomes another backup. 
+This ensures there will always be $s$ backups. 
+The integrity of the ring would only be jeopardized if $s+1$ successive nodes failed almost simultaneously, before the maintenance cycle would have a chance to correct for the failed nodes.  The chances of such an event would be $r^{s+1}$, as each failure would be independent.
 
 
 A final consequence of this is load-balancing during runtime.  As new nodes enter the network, they change their successor as the maintenance  cycle guides them into the correct location in the ring.  When a node $n$ changes his successor, $n$ asks if the successor is holding any data $n$ should be responsible for.  The successor looks at all the data $n$ is responsible for and sends it to $n$.  The successor maintains this data as a backup for $n$.  Because Map tasks are backed up in the same manner as data, a node can take the data and corresponding tasks he's responsible for and begin performing Map tasks immediately.
@@ -149,7 +152,7 @@ A final consequence of this is load-balancing during runtime.  As new nodes ente
 \section{Experiments}
 %Our Provable: We used Python to build a prototype system implementing ChordReduce and deployed it on Amazon's EC2. We created programs to solve Monte-Carlo computations and word frequency counts on our deployed network (Section \textit{ExperimentNum}).
 
-In order for ChordReduce to be a viable framework, we had to show these three properties:
+In order for ChordReduce to be a viable framework, we must show these three properties:
 \begin{enumerate}
     \item ChordReduce provides significant speedup during a distributed job.
     \item ChordReduce scales.
@@ -161,14 +164,14 @@ To establish scalability, we need to show that the cost of distributing the work
 To demonstrate robustness, we need to show that ChordReduce can handle arbitrary node failure in the ring and that such failures minimally impair the overall speed of the network.
 
 \subsection{Experimental Deployment}
-We built a fully functional implementation of ChordReduce in Python.  Our implementation implements all the routing and maintenance procedures defined by Chord\cite{chord}, the file storage capabilities of CFS \cite{CFS}, and a MapReduce service built ontop of the system. 
+We built a fully functional implementation of ChordReduce in Python.  Our implementation implements all the routing and maintenance procedures defined by Chord\cite{chord}, the file storage capabilities of CFS \cite{CFS}, and a MapReduce service built on top of the system. 
 We ran our experiments using Amazon's Elastic Compute Cloud (EC2) service.  Amazon EC2 allows users to purchase an arbitrary number of virtual machines and pay for the machines by the hour. Each node was an individual EC2 small instance \cite{amazon-instances} with a Ubuntu 12.04 image preconfigured with Git and a small startup script which retrieves the latest version of the code.
 
 We can choose any arbitrary node as the stager and tell it to run a MapReduce process. We found that the network was robust enough that we could take a node we wanted to be the stager out of the network, modify its MapReduce test code, have it rejoin the network, and then run the new code without any problems. Since only the stager has to know how to create the Map tasks, the other nodes do not have to be updated and execute the new tasks they are given.  However, this process was extremely tedious and time consuming.
 
-We created an additional node to help configure the experiment, which we call the `instrumentation node'.  We avoid calling it the `manager' or `coordinator' as we don't want to create the false impression that the instrumentation node actively participates in the experiments or is a member of the Chord ring.  The instrumentation node's roll is to aid in the generation and collection of data. 
+We created an additional node to help configure the experiment, which we call the `instrumentation node'.  We avoid calling it the `manager' or `coordinator' as we don't want to create the false impression that the instrumentation node actively participates in the experiments or is a member of the Chord ring.  The instrumentation node's role is to aid in the generation and collection of data. 
 
-First, the instrumentation node gives us an easy way to change experimental variables in between runs without having to manually reset each node. These variables range from the job size to defining the specific job.  The instrumentation node also is responsible for managing churn.  The instrumentation node keeps a list of all ``active'' and ``failed'' nodes in the network and decides when each active node fails (and abruptly drops out of the network) and when each failed node should join the ring.  Finally, each node collects data on its individual CPU utilization and bandwidth usage and sends this information to instrumentation node as part of the experiment. 
+First, the instrumentation node gives us an easy way to change experimental variables in between runs without having to manually reset each node. These variables range from the job size to defining the specific job.  The instrumentation node also is responsible for managing churn.  The instrumentation node keeps a list of all ``active'' and ``failed'' nodes in the network and decides when each active node fails (and abruptly drops out of the network) and when each failed node should join the ring.  Finally, each node collects data on its individual CPU utilization and bandwidth usage and sends this information to the instrumentation node as part of the experiment. 
 
 \subsection{Experiment Configuration}
 
@@ -183,7 +186,7 @@ First, the instrumentation node gives us an easy way to change experimental vari
 We tested our framework by running two different MapReduce jobs: a Monte-Carlo approximation of $pi$ and a word frequency count.  
 Both jobs were tested under multiple network configurations; we varied the initial size of the network\footnote{The network size changes throughout due to churn, but is unlikely to drastically vary, as the chances of joins and failures are equal.}, the size of the job, and the rate of churn.
 
-Our Monte-Carlo approximation of $\pi$ is largely analogous to having a square with the top-right quarter of a circle going through it (Fig. \ref{dartboard}), and then throwing darts at random locations.  Counting the ratio of darts that land inside the circle to the total number of throws gives us an approximation of $\frac{\pi}{4}$.  The more darts thrown, i.e. the more samples that are taken, the more accurate the approximation\footnote{This is not intended to be a particularly good approximation of $\pi$. Each additional digit of accuracy requires increasing the number of samples taken by an order of magnitude.}
+Our Monte-Carlo approximation of $\pi$ is largely analogous to having a square with the top-right quarter of a circle going through it (Fig. \ref{dartboard}), and then throwing darts at random locations.  Counting the ratio of darts that land inside the circle to the total number of throws gives us an approximation of $\frac{\pi}{4}$.  The more darts thrown, i.e. the more samples that are taken, the more accurate the approximation. \footnote{This is not intended to be a particularly good approximation of $\pi$. Each additional digit of accuracy requires increasing the number of samples taken by an order of magnitude.}
 
 We chose this experiment for a number of reasons. The job is extremely easy to distribute.  This also made it very easy to test scalability. By doubling the amount of samples to collect, we could double the amount of work each node gets without having to store new files on the network.  
 Each Map job is defined by the number of throws the node must make and yields a result containing the total number of throws and the number of throws that landed inside the circular section.  Reducing these results is then a matter of adding the respective fields together. 
@@ -191,7 +194,7 @@ Each Map job is defined by the number of throws the node must make and yields a 
 
 Our word frequency experiment counts the occurrence of each word in a corpus stored on the Chord network using CFS \cite{CFS}. We also varied the block size used for CFS to see what effect that had on computation.  
 
-To perform a word frequency count, the stager obtains the keyfile for the desired corpus and creates a data atom containing the map and reduce functions for each key listed in the keyfile.  Each node receives a data atom for each block they are responsible for and create a word frequency count for their specified blocks.  Those results are reduced by simply combining the word frequency tables. 
+To perform a word frequency count, the stager obtains the keyfile for the desired corpus and creates a data atom containing the map and reduce functions for each key listed in the keyfile.  Each node receives a data atom for each block they are responsible for and create a word frequency count for each of their specified blocks.  Those results are reduced by simply combining the word frequency tables. 
 
 %We prove that ChordReduce is scalable and highly fault tolerant, even under high levels of churn and can even benefit from churn under certain circumstances. Specifically, we show it is robust enough to reassign work during runtime in response to nodes entering and leaving the network (Section \textit{ResultsNum}).
 \section{Results}
@@ -213,17 +216,17 @@ Fig. \ref{expTime} and Fig. \ref{expSpeed} summarize the experimental results of
 
 Since our data showed that approximating $\pi$ on one node with $10^{8}$ samples took approximately 7 minutes, collecting $10^{9}$ samples on a single node would take 70 minutes at minimum.  Fig. \ref{expSpeed} shows that the $10^{9}$ set gained greater benefit from being distributed than the $10^{8}$ set, with the speedup factor at 20 workers being 9.07 compared to 4.03.  In addition, the gains of distributing work further increased at 30 workers and only began to decay at 40 workers, compared with the $10^{8}$ data set, which began its drop off at 30 workers. This behavior demonstrates that the larger the job being distributed, the greater the gains of distributing the work using ChordReduce.
 
-The $10^{7}$ sample set confirms that the network overhead is logarithmic.  At that size, it is not effective to run the job concurrently and we start seeing overheard acting as the dominant factor in runtime.  This matches the behavior predicted by our equation, $T_{n} = \frac{T_{1}}{n} + k \cdot \log_{2}(n)$. For a small $T_{1}$, $\frac{T_{1}}{n}$  approaches 0 as $n$ gets larger, while $k \cdot \log_{2}(n)$, our overhead, dominates the sample.  The samples from our data set fit this behavior, establishing that our overhead increases logarithmically with the number of workers.
+The $10^{7}$ sample set's run time grows with logarithmic behavior.  At that size, it is not effective to run the job concurrently and we start seeing overheard acting as the dominant factor in runtime.  This matches the behavior predicted by our equation, $T_{n} = \frac{T_{1}}{n} + k \cdot \log_{2}(n)$. For a small $T_{1}$, $\frac{T_{1}}{n}$  approaches 0 as $n$ gets larger, while $k \cdot \log_{2}(n)$, our overhead, dominates the sample.  The samples from our data set fit this behavior, establishing that our overhead increases logarithmically with the number of workers.
 
 
 \begin{figure}
-    \includegraphics[width=\linewidth]{projTime}
+    \includegraphics[width=0.5\linewidth]{projTime}
     \caption{The projected runtime using ChordReduce for differently sized jobs.  Each curve projects the expected behavior for job that takes a single worker the specified amount of time.}
     \label{projTime}
 \end{figure}
 
 \begin{figure}
-    \includegraphics[width=\linewidth]{projSpeed}
+    \includegraphics[width=0.5\linewidth]{projSpeed}
     \caption{The projected speedup for different sized jobs. }
     \label{projSpeed}
 \end{figure}
@@ -272,7 +275,7 @@ Experimental results were gathered via simulation and compared P2P-MapReduce to 
 
 Lee et al.'s work \cite{leemap} draws attention to the fact that a P2P network can be much more than a way to distribute files and demonstrates how to accomplish different tasks using Map and Reduce functions over a P2P network.  Rather than using Chord, Lee et al. used Symphony \cite{symphony}, another DHT protocol with a ring topology.  To run a MapReduce job over the Symphony ring, a node is selected by the user to effectively act as the master.  This ad-hoc master then performs a bounded broadcast over a subsection the ring.  Each node repeats this broadcast over a subsection of that subsection, resulting in a tree with the first node at the top.  
 
-Map tasks are disseminated evenly throughout the tree and their results are reduced on the way back up to the ad-hoc master node.  This allows the ring to disseminate Map and Reduce tasks without the need for a coordinator responsible for distributing these tasks and keeping track of them, unlike Hadoop.  Their experimental results showed that the latency experienced by a centralized configuration is similar to the latency experienced in a completely distributed framework.
+Map tasks are disseminated evenly throughout the tree and their results are reduced on the way back up to the \textit{ad hoc} master node.  This allows the ring to disseminate Map and Reduce tasks without the need for a coordinator responsible for distributing these tasks and keeping track of them, unlike Hadoop.  Their experimental results showed that the latency experienced by a centralized configuration is similar to the latency experienced in a completely distributed framework.
 
 
 %While P2P-MapReduce is decentralized, it still relies on a very definite master/slave hierarchy for organization, computations, and scaling. During simulation, 1\% of the entire network was assigned as master nodes. This means for a simulation of 40000 nodes, 400 were required to organize and coordinate jobs, rendering them unable to do any processing.  In addition, a loosely-consistent  distributed hash table (DHT) such as JXTA can be much slower and fails to maintain the same level of guarantees as an actual DHT, such as Chord \cite{5359174}.   
@@ -303,7 +306,7 @@ Both of these papers have promising results and confirm the capability of our ow
 
 
 
-We presented ChordReduce, a framework for MapReduce that is completely decentralized, scalable, load balancing, and highly tolerant to churn and node failure at any point in the network. We implemented a fully functional version of ChordReduce and performed detailed experiments to test its performance. These experiments confirmed that ChordReduce is robust and effective. ChordReduce is based on Chord, which is traditionally viewed as a P2P framework for distributing and sharing files.  Instead, we demonstrated that it can also be used as a platform for distributed computation.  Chord provides $\log_{2} n$ connectivity throughout network and has built in mechanisms for handling backup, automatically assigning responsibility, routing, and load balancing. 
+We presented ChordReduce, a framework for MapReduce that is completely decentralized, scalable, load balancing, and highly tolerant to churn and node failure at any point in the network. We implemented a fully functional version of ChordReduce and performed detailed experiments to test its performance. These experiments confirmed that ChordReduce is robust and effective. ChordReduce is based on Chord, which is traditionally viewed as a P2P framework for distributing and sharing files.  Instead, we demonstrated that it can also be used as a platform for distributed computation.  Chord provides $\log_{2} n$ connectivity throughout network and has built-in mechanisms for handling backup, automatically assigning responsibility, routing, and load balancing. 
 
 
 Using Chord as the middleware for ChordReduce establishes its effectiveness for distributed and concurrent computation.

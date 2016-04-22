@@ -47,7 +47,7 @@
 \renewcommand{\cftloftitlefont}{\normalsize\bfseries\raggedright}
 \renewcommand{\cftlottitlefont}{\normalsize\bfseries\raggedright}
 
-\renewcommand\cftsecleader{\cftdotfill{\cftdotsep}}
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}} % for chapters
 
 \AtBeginDocument{\renewcommand\contentsname{Table of Contents}}
 
@@ -72,10 +72,14 @@
 	\end{center}
 	
 	Many competing designs for Distributed Hash Tables exist exploring multiple models of addressing, routing and network maintenance. 
-Designing a general theoretical model and implementation of a Distributed Hash Table allows exploration of the possible properties of distributed hash tables. We will propose a generalized model of DHT behavior, centered on utilizing Delunay triangulation in a given metric space to maintain the network’s topology. We will show that utilizing this model, we can produce network typologies that approximate existing DHT methods and provide a starting point for further exploration.
-Previous research has explored utilizing a hyperbolic metric space to provide efficient greedy routing for overlay networks. We will use our generalized model of DHT construction to design and implement more efficient distributed hash table protocol, and discuss the qualities of potential successors to existing DHT technologies.
-	
-	\vfill
+Designing a general theoretical model and implementation of a Distributed Hash Table allows exploration of the possible properties of distributed hash tables. We will propose a generalized model of DHT behavior, centered on utilizing Delaunay triangulation in a given metric space to maintain the network’s topology. 
+We will show that utilizing this model we can produce network topologies that approximate existing DHT methods and provide a starting point for further exploration.
+Previous research has explored utilizing a hyperbolic metric space to provide efficient greedy routing for overlay networks.
+We will use our generalized model of DHT construction to design and implement more efficient distributed hash table protocols, and discuss the qualities of potential successors to existing DHT technologies.
+
+\vfill
+INDEX WORDS: P2P, Distributed Hash Table, Decentralized, Networking
+
 	
 	
 	% Bottom of the page
@@ -149,8 +153,9 @@ Previous research has explored utilizing a hyperbolic metric space to provide ef
 	
 	
 	\chapter*{Dedication}
-	This work is dedicated to those in my who supported me in pursuing my education out of a desire to see me grow: my patient and encouraging spouse, Erin Gillman, and my parents, Bill and Denise Benshoof, who have been active sponsors of my education for my entire life.
-	\pagenumbering{roman}	
+	This work is dedicated to those who supported me in pursuing my education out of a desire to see me grow: my patient and encouraging spouse, Erin Gillman, and my parents, Bill and Denise Benshoof, who have been active sponsors of my education for my entire life.
+	\pagenumbering{roman}
+	\setcounter{page}{4}	
 	
 	\chapter*{Acknowledgements}	
 

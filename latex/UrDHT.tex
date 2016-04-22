@@ -1,15 +1,15 @@
 \chapter{UrDHT: A Unified Model for Distributed Hash Tables}
 
 
-\begin{center}
-Andrew Rosen \qquad Brendan Benshoof \qquad Robert W. Harrison \qquad Anu G. Bourgeois
+%\begin{center}
+%Andrew Rosen \qquad Brendan Benshoof \qquad Robert W. Harrison \qquad Anu G. Bourgeois
 
-Under consideration by ICPP 2016
-\end{center}
+%Under consideration by ICPP 2016
+%\end{center}
 
 
 
-\section{Introduction}
+
 %Distributed Hash Tables (DHT) have been extensively researched for the past decade.
 %Many different DHT protocols have developed over the years.
 %What is a DHT
@@ -41,7 +41,7 @@ UrDHT builds its topology directly upon this insight.
 It uses a greedy distributed heuristic for approximating Delaunay Triangulations.
 We found that we could reproduce the topology of different DHTs by defining a selection heuristic and rejection algorithm for the geometry the DHT.
 For every DHT we implemented, our greedy approximation of Delaunay Triangulation produced a stable DHT, regardless of the geometry.  
-This works in non-Euclidean geometries such as XOR (Kademlia) or even a hyperbolic geometry represented by a Poincar\`{e} disc.
+This works in non-Euclidean metrics such as XOR (Kademlia) or even a hyperbolic geometry represented by a Poincar\`{e} disc.
 
 The end result is not only do we have an abstract model of DHTs, we have a simple framework that developers can use to quickly create new distributed applications.
 This simple framework allows generation of internally consistent implementations of different DHTs that can have their performance rigorously compared.  %we can now test DHTs against each other fairly
@@ -73,7 +73,7 @@ To summarize our contributions:
 	\item We present UrDHT as an abstract DHT and show how a developer would modify the functions we defined to create an arbitrary new DHT topology (Section \ref{sec:urdht}).
 	
 	\item We show how to reproduce the topology of Chord and Kademlia using UrDHT.
-	We also implement a DHT in a Euclidean geometry and a hyperbolic geometry represented by a Poincar\`{e} disc (Section \ref{sec:implement}).
+	We also implement a DHT in Euclidean geometry and a hyperbolic geometry represented by a Poincar\`{e} disc (Section \ref{sec:implement}).
 %	We also discuss how we can use UrDHT to run subnetworks as a service.
 	\item We conduct experiments that show building DHTs using UrDHT produced efficiently routable networks, regardless of the underlying geometry(Section \ref{sec:experiments}). 
 	\item We present some efforts and projects that are similar to our own (Section \ref{sec:related}).
@@ -147,20 +147,14 @@ This algorithm may possibly be run in parallel, such as in Kademlia \cite{kademl
 The base greedy algorithm is always the same regardless of the implementation.
 
 
-\begin{figure}
-	\centering
-	\includegraphics[width=0.5\linewidth]{voronoi}
-	\caption{An example Voronoi diagram for objects on a 2-dimensional space.  The black lines correspond to the borders of the Voronoi region, while the dashed lines correspond to the edges of the Delaunay Triangulation.}
-	\label{voro-ex}
-\end{figure}
 
 
 With the components of a DHT defined above, we can now show the relationship between DHTs and the primal-dual problems of Delaunay Triangulation and Voronoi Tessellation.
-An example Delaunay Triangulation and Voronoi Tessellation is show in Figure \ref{voro-ex}.
+An example of Delaunay Triangulation and Voronoi Tessellation is show in Figure \ref{voro-ex}.
 
 %TODO A one-dimensional voronoi fig as example
 We can map a given node's ID to a point in a space and the set of short peers to the Delaunay Triangulation.
-This would make the range of keys a node is responsible correspond to the node's Voronoi region.
+This would make the set of keys a node is responsible for correspond to the node's Voronoi region.
 Long peers serve as shortcuts across the mesh formed by Delaunay Triangulation.
 
 
@@ -168,9 +162,9 @@ Thus, if we can calculate the Delaunay Triangulation between nodes in a DHT, we 
 This can be done with any algorithm that calculates the Delaunay Triangulation.
 
 Computing the Delaunay Triangulation and/or the Voronoi Tessellation of a set of points is a well analyzed problem.
-Many algorithms exist which efficiently compute a Voronoi Tessellation for a given set of points on a plane, such as Fortune's sweep line algorithm \cite{fortune1987sweepline}.
+Many algorithms exist that efficiently compute a Voronoi Tessellation for a given set of points on a plane, such as Fortune's sweep line algorithm \cite{fortune1987sweepline}.
 
-However, DHTs are completed decentralized, with no single node having global knowledge of the topology.
+However, DHTs are completely decentralized, with no single node having global knowledge of the topology.
 Many of the algorithms to compute Delaunay Triangulation and/or Voronoi Tessellation are unsuited to a distributed environment.
 In addition, the computational cost increases when we move into spaces with greater than two dimensions.
 In general, finding the Delaunay Triangulation of $n$ points in a space with $d$ dimensions takes $O(n^{\frac{2d-1}{d}})$ time \cite{watson1981computing}.
@@ -191,7 +185,7 @@ Additional details can be found in our previous work \cite{dgvh}.
 
 
 
-We have tested DGVH on Chord (a ring-based topology), Kademlia (an XOR-based tree topology), general Euclidean spaces, and even in a hyperbolic geometry.
+We have tested DGVH on Chord (a ring-based topology), Kademlia (an XOR-based tree topology),  Euclidean space, and even on a hyperbolic surface.
 This is interesting because not only can we implement the contrived topologies of existing DHTs, but more generalizable topologies like Euclidean or hyperbolic geometries.
 We show in Section \ref{sec:experiments} that DGVH works in all of these spaces.
 DGVH only needs the distance function to be defined in order for nodes to perform lookup operations and determine responsibility.
